@@ -29,8 +29,11 @@ def set_proj(id):
 
 def open_json_file(data):
     """Opens entire JSON file for parsing
-    Data: the JSON Data"""
-    return data
+    Data: the JSON Data ( The path string )"""
+    with open(data) as jfile:
+        json_data = json.load(jfile)
+
+    return json_data
 
 
 def open_interview(data):

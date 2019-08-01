@@ -1,0 +1,4 @@
+watchdog
+Flask
+moviepy
+azure-file-storage

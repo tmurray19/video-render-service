@@ -14,7 +14,12 @@ DIR_LOCATION = "G:/project"
 attach_dir = os.path.abspath(DIR_LOCATION)
 
 
-def render_video(user, html_render=False):
+def render_video(user, json_data=None, html_render=False):
+    """
+    User: String -> The ID of the project (User is just a hangover from previous builds)
+    json_data: String -> The path to the JSON data 
+    html_render: Bool -> Set to true if you want this function to return html code of the render
+    """
     start_time = time.time()
     """Needs to check for a project_id (user)
     Set html_render to True if you want this function to return html embed code for a preview"""
@@ -27,8 +32,10 @@ def render_video(user, html_render=False):
     # Define current length of video, in terms of the 'main' timeline
     mainTimeline = 0
 
-    # May be better to read information from this json call, instead of sherpaUtils
-    json_file = sherpaUtils.set_proj(user)
+    if json_data is not None:
+        json_file = sherpaUtils.open_json_file(json_data)
+    else:
+        json_file = sherpaUtils.set_proj(user)
 
     # Automated all the clips
     for clipName in json_file['CutAwayFootage']:
@@ -59,7 +66,7 @@ def render_video(user, html_render=False):
         # Generate image
         elif clipType == "Image":
             print(clipName + " is an image.")
-            clip = generateEffects.generate_image_clip(clipData)
+            clip = generateEffects.generate_image_clip(clipData, user)
             top_audio.insert(clipData.get('order'), clip.audio)
 
         # If it's a blank
