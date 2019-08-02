@@ -176,3 +176,5 @@ def render_video(user, json_data=None, html_render=False):
 
         print("Completed in {} seconds.".format(time.time() - start_time))
 
+test_id = input("Please enter ID: ")
+render_video(test_id)
