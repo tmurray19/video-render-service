@@ -2,9 +2,10 @@ import time
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import driveClip
+from config import Config
 
 class Watcher:
-    DIRECTORY_TO_WATCH = "G:/project/queue"
+    DIRECTORY_TO_WATCH = (Config.DIR_LOCATION, "queue")
 
     def __init__(self):
         self.observer = Observer()

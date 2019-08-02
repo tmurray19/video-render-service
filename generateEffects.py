@@ -1,15 +1,15 @@
 import moviepy.editor as myp
 import sherpaUtils
 import os
-
+from config import Config
 
 DIR_LOCATION = 'G:/project'
 RESOURCE_PATH = 'resource'
 SILENCE = 'silence.mp3'
 
 
-silence_path = os.path.join(DIR_LOCATION, RESOURCE_PATH, SILENCE)
-attach_dir = DIR_LOCATION
+silence_path = os.path.join(Config.DIR_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
+attach_dir = Config.DIR_LOCATION
 
 positions = {
     0: ("left", "top"),  # Top Left

@@ -4,14 +4,12 @@ import generateEffects
 import sherpaUtils
 import os
 import time
-
-
-DIR_LOCATION = "G:/project"
+from config import Config
 
 
 # TODO: This needs to be changed in the app.config to
 #  read to the correct attach directory as outlined in the configuration
-attach_dir = os.path.abspath(DIR_LOCATION)
+attach_dir = os.path.abspath(Config.DIR_LOCATION)
 
 
 def render_video(user, json_data=None, html_render=False):

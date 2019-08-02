@@ -1,14 +1,11 @@
 import os
 import azureFileTransfer
 import json
+from config import Config
 
 
-# TODO: CHANGE
-DIR_LOCATION = 'G:/project'
-PROJECT_NAME = 'FinalSubclipJson.json'
-
-attach_dir = DIR_LOCATION
-proj = PROJECT_NAME
+attach_dir = Config.DIR_LOCATION
+proj = Config.PROJECT_NAME
 
 
 """
