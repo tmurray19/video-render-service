@@ -4,7 +4,7 @@ from watchdog.events import FileSystemEventHandler
 import driveClip
 
 class Watcher:
-    DIRECTORY_TO_WATCH = "G:\project\queue"
+    DIRECTORY_TO_WATCH = "G:/project/queue"
 
     def __init__(self):
         self.observer = Observer()
