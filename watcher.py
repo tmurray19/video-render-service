@@ -3,9 +3,12 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import driveClip
 from config import Config
+import os.path
+import json
+from datetime import datetime
 
 class Watcher:
-    DIRECTORY_TO_WATCH = (Config.DIR_LOCATION, "queue")
+    DIRECTORY_TO_WATCH = os.path.join(Config.DIR_LOCATION, Config.QUEUE_FOLDER)
 
     def __init__(self):
         self.observer = Observer()
@@ -17,6 +20,7 @@ class Watcher:
         try:
             while True:
                 time.sleep(5)
+                print("Watcher: Sleeping")
         except:
             self.observer.stop()
             print("Error")
@@ -28,13 +32,30 @@ class Handler(FileSystemEventHandler):
 
     @staticmethod
     def on_any_event(event):
+        print("Watcher: Event found")
         if event.is_directory:
             return None
 
+
         elif event.event_type == 'created':
+            time.sleep(1)
             # Take any action here when a file is first created.
             print("Received created event - %s." % event.src_path)
-            #driveClip.render_video("test", json_data=event.src_path)
+            # Testing print
+            print("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
+            print("Source path: {}".format(event.src_path))
+            # Open the file for reading
+            json_file = open(event.src_path, 'r')
+            json_data = json.load(json_file)
+            # Get the ID and run the render on it
+            proj_id = json_data["id"]
+            print("Project ID is {}".format(proj_id))
+            driveClip.render_video(proj_id)
+            # Update the complete time at the end and dump it to file 
+            json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
+            with open(event.src_path, "w") as json_write:
+                json.dump(json_data, json_write)
+
 
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.

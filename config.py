@@ -2,8 +2,9 @@
 import os
 
 
+# Config file
 class Config(object):
-     # TODO: Change this location to the azure file share mount location
+    # TODO: Change this location to the azure file share mount location
     DIR_LOCATION = os.environ.get('DIR_LOCATION') or "/mnt/csae48d5df47deax41bcxbaa/videos"
     # Defining storage name and key
     STORAGE_ACCOUNT_NAME = os.environ.get('STORAGE_ACCOUNT_NAME') or 'csae48d5df47deax41bcxbaa'
@@ -18,3 +19,4 @@ class Config(object):
     RESOURCE_PATH = os.environ.get('RESOURCE_PATH') or 'resource'
     # Name of silence mp3
     SILENCE = os.environ.get('SILENCE') or 'silence.mp3'
+    QUEUE_FOLDER = os.environ.get('QUEUE_FOLDER') or 'renderQueue'

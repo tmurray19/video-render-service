@@ -144,14 +144,10 @@ def render_video(user, json_data=None, html_render=False):
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)
 
-    try:
-        bottom_audio = concatenate_audioclips(bottom_audio)
+    bottom_audio = concatenate_audioclips(bottom_audio)
 
-        # Composite the sound together
-        finished_audio = CompositeAudioClip([top_audio, bottom_audio])
-    # In case no bottom audio is found
-    except ValueError:
-        finished_audio = top_audio
+    finished_audio = CompositeAudioClip([top_audio, bottom_audio])
+
 
     # Concatenate the video files together
     finished_video = concatenate_videoclips(video_list)
@@ -175,6 +171,3 @@ def render_video(user, json_data=None, html_render=False):
         )
 
         print("Completed in {} seconds.".format(time.time() - start_time))
-
-test_id = input("Please enter ID: ")
-render_video(test_id)
