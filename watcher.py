@@ -47,20 +47,45 @@ class Handler(FileSystemEventHandler):
             # Open the file for reading
             json_file = open(event.src_path, 'r')
             json_data = json.load(json_file)
-            # Get the ID and run the render on it
-            proj_id = json_data["id"]
-            print("Project ID is {}".format(proj_id))
-            driveClip.render_video(proj_id)
-            # Update the complete time at the end and dump it to file 
-            json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
-            with open(event.src_path, "w") as json_write:
-                json.dump(json_data, json_write)
+            print(json_data['status'])
+            # If job hasn't been done
+            if json_data['status'] == False:
+                # Get the ID and run the render on it
+                proj_id = json_data["id"]
+                print("Project ID is {}".format(proj_id))
+                driveClip.render_video(proj_id)
+                # Update the complete time at the end and dump it to file 
+                json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
+                json_data['status'] == True
+                with open(event.src_path, "w") as json_write:
+                    json.dump(json_data, json_write)
+            else:
+                print("File already rendered")
 
 
         elif event.event_type == 'modified':
             # Taken any action here when a file is modified.
             print("Received modified event - %s." % event.src_path)
-
+            # Testing print
+            print("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
+            print("Source path: {}".format(event.src_path))
+            # Open the file for reading
+            json_file = open(event.src_path, 'r')
+            json_data = json.load(json_file)
+            print(json_data['status'])
+            # If job hasn't been done
+            if json_data['status'] == False:
+                # Get the ID and run the render on it
+                proj_id = json_data["id"]
+                print("Project ID is {}".format(proj_id))
+                driveClip.render_video(proj_id)
+                # Update the complete time at the end and dump it to file 
+                json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
+                json_data['status'] = True
+                with open(event.src_path, "w") as json_write:
+                    json.dump(json_data, json_write)
+            else:
+                print("File already rendered")
 
 if __name__ == '__main__':
     w = Watcher()
