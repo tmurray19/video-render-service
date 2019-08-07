@@ -144,49 +144,7 @@ def get_proj_name(data):
     proj_name = data.get('Name')
     return proj_name
 
-"""
-# return full directories for each folder
-def get_edit_dir(relative_path='', user=''):
-    try:
-        edit_dir = os.path.join(
-            relative_path,
-            user,
-            'edited/'
-        )
-        return edit_dir
-    except FileNotFoundError:
-        print("Edited folder not found.")
-        return 0
-
-
-# Written as concession for having folders in different locations to py files
-def get_json_dir(relative_path='', user=''):
-    try:
-        json_dir = os.path.join(
-            relative_path,
-            user,
-            'json/'
-        )
-        return json_dir
-    except FileNotFoundError:
-        print("JSON folder not found.")
-        return 0
-
-
-# May or may not be necessary, written for the case that files are stored elsewhere
-def get_clips_dir(relative_path='', user=''):
-    try:
-        clips_dir = os.path.join(
-            relative_path,
-            user,
-            'clips/'
-        )
-        return clips_dir
-    except FileNotFoundError:
-        print("Clips folder not found.")
-        return 0
-"""
-
+    
 # Get the directory attached to the container
 # TODO
 def get_attach_dir():
@@ -232,7 +190,34 @@ def current_interview_footage(data, clip_timeline):
         if interview_runtime > clip_timeline:
             # Return the clip, its start time in the interview timeline, and its endtime
             return interview_data[item], interview_runtime - clip_length
-
+        #print("We got here with item '{}'".format(item))
+        #del interview_data[item]
     # Should only get here if no suitable clip has been found
     raise TypeError("No clip has been found")
 
+def calculate_timeline_length(timeline_data):
+    """
+    timeline_data: dict --> The dictionary/json data for a timeline of a render, whether it's the
+        interview timeline or the cutaway timeline
+    
+    Function for calculating the runtime of the given timeline. Calls the caclulate_clip_lenght on all the clips in the timeline
+    """
+    length = 0
+
+    for item in timeline_data:
+        length += calculate_clip_length(timeline_data[item]['Meta'])
+
+    return length
+
+
+def order_picker(timeline_1_runtime, timeline_2_runtime):
+    """
+    timeline_1_runtime, timeline_2_runtime: int --> The timeline lenghts in seconds
+    This function returns the dictionary of either timelines, depending on which of the two is larger
+    Purpose of the function is to decide which timeline should get the end of timeline blank
+    The timeline with the smallest runtime should be the one to get the blank
+    """
+    if timeline_1_runtime < timeline_2_runtime:
+        return 'CutAwayFootage'
+    else:
+        return 'InterviewFootage'
