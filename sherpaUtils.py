@@ -3,47 +3,44 @@ import azureFileTransfer
 import json
 from config import Config
 
-
+# Defining the location of the Azure File Share and the name of the json file to look for in a given project
 attach_dir = Config.DIR_LOCATION
 proj = Config.PROJECT_NAME
-
 
 """
 Utility functions for accessing and mutating files
 """
 
-
-def set_proj(id):
-    """Creates an Azure File Share instance and reads the json data found in the specified ID"""
-    #azure = azureFileTransfer.create_share_dir(id)
-    #data = azureFileTransfer.get_json(id, azure)
-
+def open_proj(id):
+    """
+    id: string --> The id of the project
+    
+    Looks for the id within the video folder of the azure file share attachment, and opens the video
+    """
     with open(os.path.join(attach_dir, id, proj)) as jfile:
         data = json.load(jfile)
 
     return data
 
 
-def open_json_file(data):
-    """Opens entire JSON file for parsing
-    Data: the JSON Data ( The path string )"""
-    with open(data) as jfile:
-        json_data = json.load(jfile)
-
-    return json_data
-
-
 def open_interview(data):
-    """Opens and returns the interview data in the JSON file"""
+    """
+    Data: dict --> The JSON data, opened as a dictionary using json.load
+
+    Returns the interview data found in the json file
+    """
     interview_data = data['InterviewFootage']
     return interview_data
 
 
 # Pass the json file through this data
 def open_interview_meta_data(data, clip):
-    """Reads metadata for the interview track of the json file
-    Data: The entire JSON data
-    Clip: The name of the Clip dictionary within the json data you're searching for"""
+    """
+    data: dict --> The entire JSON data
+    clip: string --> The name of the Clip dictionary within the json data you're searching for
+
+    Returns the meta metadata for the interview track of the json file
+    """
     # Read JSON File Name and load file
     interview_data = data['InterviewFootage']
     return interview_data[clip]['Meta']
@@ -51,9 +48,8 @@ def open_interview_meta_data(data, clip):
 
 # Pass the json file through this data
 def open_interview_edit_data(data, clip):
+    """Reads edit data for the interview track of the json file"""
     try:
-        """Reads edit data for the interview track of the json file"""
-
         interview_data = data['InterviewFootage']
         return interview_data[clip]['edit']
     except KeyError:
@@ -133,32 +129,10 @@ def open_clip_caption_data(data, clip):
         return 0
 
 
-# Creating folders for files
-def dir_create(relative_path='', user=''):
-    """
-    Likely Depreciated
-    Creates 3 directories for various files
-    Passes if any one of these directories already exists
-    """
-    try:
-        os.mkdir(os.path.join(relative_path, user, 'json/'))
-        os.mkdir(os.path.join(relative_path, user, 'clips/'))
-        os.mkdir(os.path.join(relative_path, user, 'edited/'))
-        print("Folders successfully initialised")
-    except FileExistsError:
-        print("One of these folders already exists.")
-
-
 # Gives the name of the overall project, passing its filename through
 def get_proj_name(data):
     proj_name = data.get('Name')
     return proj_name
-
-    
-# Get the directory attached to the container
-# TODO
-def get_attach_dir():
-    pass
 
 
 # Sets caption duration to clip duration if one is longer than the other
@@ -170,19 +144,10 @@ def max_duration(caption_duration, clip_duration):
 
 # Gives length of a given clip
 def calculate_clip_length(clip_data):
-    #has_duration = (clip_data.get('clipType') == "Blank" or clip_data.get('clipType') == "Image")
-
-    # If it doesn't have a duration, do calculations
-    #if has_duration is False:
-
     start = clip_data.get('startTime')
     end = clip_data.get('endTime')
 
     return end - start
-
-    # If it does, just return the duration
-    #else:
-        #return clip_data.get('duration')
 
 
 # Find currently playing interview footage, and returns the JSON item

@@ -9,7 +9,7 @@ import generateEffects, sherpaUtils, os, time, logging
 attach_dir = os.path.abspath(Config.DIR_LOCATION)
 
 
-def render_video(user, json_data=None, html_render=False):
+def render_video(user, html_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
     json_data: String -> The path to the JSON data 
@@ -27,12 +27,8 @@ def render_video(user, json_data=None, html_render=False):
     # Define current length of video, in terms of the 'main' timeline
     cutaway_timeline = 0
 
-    if json_data is not None:
-        # Open the project at the defined location
-        json_file = sherpaUtils.open_json_file(json_data)
-    else:
-        # Look for the json file in the project folder
-        json_file = sherpaUtils.set_proj(user)
+    # Look for the json file in the project folder
+    json_file = sherpaUtils.open_proj(user)
 
     # Get timeline lenghts
     cutaway_timeline_lenght = sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage'])
@@ -201,60 +197,7 @@ def render_video(user, json_data=None, html_render=False):
 
         cutaway_timeline += clip.duration
         video_list.insert(clip_data.get('order')-1, clip)
-    """
-    # Following all the cut away clips, we need to make sure any hangover interviwe clips are accounted for
-    print("Total cut away timeline comes to {}.".format(cutaway_timeline))
 
-    # Get the current runtime of the interview timeline
-    current_clip = sherpaUtils.current_interview_footage(data=json_file, clip_timeline=cutaway_timeline)[0]
-    print("Clip that should currently be showing is {}".format(current_clip))
-    print("It should be playing at {}".format(cutaway_timeline))
-
-    # Generate the clip based on what should currently be playi ng
-    interview_clip = generateEffects.generate_clip(clip_data=current_clip['Meta'], user=user, start=cutaway_timeline)
-    
-    # Insert that at the end of the list
-    video_list.insert(len(video_list), interview_clip)
-
-    # Define a variable of the current list lenght to shift all remaining clips by, so they're inserted correctly
-    order_shift_number = len(video_list)
-    
-    remaining_videos = json_file['InterviewFootage']
-    del remaining_videos[current_clip['Meta'].get('name')]
-
-    # Add remaining items to cut away timeline
-    for item in remaining_videos:
-        item_meta_data = remaining_videos[item]['Meta']
-        #item_edit_data = remaining_videos[item]['edit']
-
-        clip_type = item_meta_data.get('clipType')
-
-        if clip_type == "Blank":
-            print(item_meta_data.get('name') + " is a blank.")
-            clip = generateEffects.generate_blank(clip_data)
-            top_audio.insert(clip_data.get('order')+order_shift_number, clip.audio)
-
-        elif clip_type == "Image":
-            print(item_meta_data.get('name') + " is an image.")
-            clip = generateEffects.generate_image_clip(clip_data, user)
-            top_audio.insert(clip_data.get('order')+order_shift_number, clip.audio)
-
-        elif clip_type == "Interview":
-            print(item_meta_data.get('name') + " is a cutaway.")
-            clip = generateEffects.generate_clip(clip_data, user)
-            top_audio.insert(clip_data.get('order')+order_shift_number, clip.audio)
-
-            # Look for the clip caption data
-            captionData = sherpaUtils.open_interview_caption_data(data=json_file, clip=item)
-
-            # Append here if it's needed
-            if captionData is not 0:
-                caption = generateEffects.generate_text_caption(captionData, clip_data)
-                clip = CompositeVideoClip([clip, caption])
-
-        video_list.insert(clip_data.get('order')+order_shift_number-1, clip)
-
-    """
     # Printout at end
     print(video_list)
 

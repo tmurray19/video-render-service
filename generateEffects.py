@@ -23,6 +23,14 @@ positions = {
     8: ("right", "bottom")  # Center right
 }
 
+sizes = {
+    "small": 12,
+    "medium": 20,
+    "large": 80,
+    "x-large": 160,
+    "xx-large": 400
+}
+
 
 # Generate a blank image
 # Add text right now just for clarity sake
@@ -177,8 +185,33 @@ def better_generate_text_caption(clip_name):
 
     This function also handles any error with no caption being found
     """
-    pass
+    clip_data = 0
+    caption_data = 0
 
-    
-    #try:
-        #caption_data = sherpaUtils.open_caption_data(clip_name)
+    start = (clip_data.get('startTime'))
+    end = (clip_data.get('endTime'))
+
+    dur = end - start
+
+    blank_clip = myp.ColorClip(
+        size=[1920, 1080],
+        color=(0, 0, 0),
+        duration=dur
+    )
+
+    # Can be removed later
+    text_caption = myp.TextClip(
+        txt="This is a blank",
+        color="White",
+        fontsize=72
+    )
+
+    text_caption = text_caption.set_position('center').set_duration(dur)
+
+    blank_clip = myp.CompositeVideoClip([blank_clip, text_caption])
+
+    audio = myp.AudioFileClip(silence_path)
+
+    blank_clip = blank_clip.set_audio(audio.set_duration(dur))
+
+    return blank_clip
