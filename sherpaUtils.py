@@ -78,6 +78,16 @@ def open_cut_away(data):
     return clip_data
 
 
+def open_clip_data(data, clip):
+    """
+    data: dict --> The json data to be searching through
+    clip: string --> The name of the dictionary entry (clip) to be searching for
+
+    Returns the entire clip data, the meta and the edit data for a clip
+    """
+    clip_data = data['CutAwayFootage']
+
+
 def open_clip_meta_data(data, clip):
     """
     Opens and reads the metadata from a given JSON file name
@@ -221,3 +231,32 @@ def order_picker(timeline_1_runtime, timeline_2_runtime):
         return 'CutAwayFootage'
     else:
         return 'InterviewFootage'
+
+
+def calculate_time_at_clip(clip_data, clip_timeline_data, timeline_len=None):
+    """
+    clip_data: dict --> The dictionary information of the clip, specifically it's metadata
+    clip_timeline_data: dict --> The dictionary information of the timeline the clip is coming from
+    timeline_len: int --> The lenght of the smaller timeline, for calculating the lenght of the blank
+
+    This function is designed to take in a clip, and give out the time that clip should be playing at in it's current timeline
+    It runs through the dictionary, and for all items whose order is less than the clip_data order
+    It calculates the lenght of the clip, and adds it to a holder variable
+    It then returns this completed calculated value"""
+
+    runtime = 0
+    ord = clip_data.get('order')
+    
+    for clip in clip_timeline_data:
+        if clip_timeline_data[clip]['Meta'].get('order') <= ord:
+            clip_time = calculate_clip_length(clip_timeline_data[clip]['Meta'])
+            runtime += clip_time
+
+    if timeline_len is not None:
+        return runtime - timeline_len
+    return runtime
+
+
+def open_caption_data(clip):
+    edit = clip['edit']['Caption']
+    return edit

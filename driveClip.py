@@ -15,47 +15,80 @@ def render_video(user, json_data=None, html_render=False):
     json_data: String -> The path to the JSON data 
     html_render: Bool -> Set to true if you want this function to return html code of the render
     """
+    # For logging
     start_time = time.time()
-    """Needs to check for a project_id (user)
-    Set html_render to True if you want this function to return html embed code for a preview"""
+
     # Finished timeline video
     video_list = []
 
-    # Top and Bottom audio timeline
+    # Top audio timeline
     top_audio = []
 
     # Define current length of video, in terms of the 'main' timeline
     cutaway_timeline = 0
 
     if json_data is not None:
+        # Open the project at the defined location
         json_file = sherpaUtils.open_json_file(json_data)
     else:
+        # Look for the json file in the project folder
         json_file = sherpaUtils.set_proj(user)
 
-    """
-    cutaway_timeline_lenght = sherpaUtils.calculate_timeline_lenghth(json_file['CutAwayFootage'])
-    interview_timeline_length = sherpaUtils.calculate_timeline_lenghth(json_file['InterviewFootage'])
+    # Get timeline lenghts
+    cutaway_timeline_lenght = sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage'])
+    interview_timeline_length = sherpaUtils.calculate_timeline_length(json_file['InterviewFootage'])
 
+    # Find the smallest timeline lenght
     smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_lenght, interview_timeline_length)
+    
+    print("Smallest timeline is currently {} with lenght {}".format(smallest_timeline, cutaway_timeline_lenght))
 
-    end_of_file_blank = {
-    "end_of_blank": {
-            "Meta": {
-                "name": "end_of_file_blank",
-                "startTime": min(cutaway_timeline_lenght, interview_timeline_length),
-                "endTime": max(cutaway_timeline_lenght, interview_timeline_length),
-                "audioLevel": 1,
-                "order": len(json_file[smallest_timeline])+1,
-                "clipType": "Blank"
+    if smallest_timeline == "CutAwayFootage":
+        print("Smallest timeline is currently the Cut Away Timeline, correcting timelines as necessary")
+        blank_no = 1
+
+    # While the smallest timeline is the cut away timeline
+    # TODO: THIS ISSUE MAY ONLY OCCUR IF THE CUTAWAY TIMELINE IS SHORTER THAN THE TOP TIMELINE
+    while smallest_timeline == 'CutAwayFootage':
+        # Calculate the length of the blank that should be playing at the smallest timeline 
+        current_interview_clip = sherpaUtils.current_interview_footage(
+            json_file, 
+            cutaway_timeline_lenght
+        )[0]
+
+        # Calculate when the clip om the interview timeline should be playing (globally), and returns the lenght that the blank clip should be
+        blank_len = sherpaUtils.calculate_time_at_clip(current_interview_clip['Meta'], json_file['InterviewFootage'], timeline_len=cutaway_timeline_lenght)
+
+
+        # Creating a blank clip to insert into time
+        blank_name = "end_of_line_blank_" + str(blank_no)
+
+        end_of_line_blank = {
+        blank_name: {
+                "Meta": {
+                    "name": blank_name,
+                    "startTime": 0,
+                    "endTime": blank_len,
+                    "audioLevel": 1,
+                    "order": len(json_file[smallest_timeline])+1,
+                    "clipType": "Blank"
+                }
             }
         }
-    }
-    
 
-    json_file[smallest_timeline].update(end_of_file_blank)
+        blank_no += 1
+        print(end_of_line_blank)
+        # Insert it into the timeline
+        json_file[smallest_timeline].update(end_of_line_blank)
 
-    print("Cutaway length: {}, Inteview length: {}".format(cutaway_timeline_lenght, interview_timeline_length))
-    """
+        # Update the lenght
+        cutaway_timeline_lenght += blank_len
+        print("Cutaway length: {}, Inteview length: {}".format(cutaway_timeline_lenght, interview_timeline_length))
+            
+        print(cutaway_timeline_lenght<interview_timeline_length)
+        smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_lenght, interview_timeline_length)
+
+
     # Automated all the clips
     for clip_name in json_file['CutAwayFootage']:
 
@@ -65,6 +98,7 @@ def render_video(user, json_data=None, html_render=False):
 
         # Initialise clip data first
         clip_data = sherpaUtils.open_clip_meta_data(data=json_file, clip=clip_name)
+        #clip_data = sherpaUtils.open_clip_data(data=json_file, clip=clip_name)
 
         clip_type = clip_data.get('clipType')
 
@@ -95,16 +129,16 @@ def render_video(user, json_data=None, html_render=False):
 
                 interviewClipCaption = 0
 
-                blankInterviewClip, interviewStartTime = sherpaUtils.current_interview_footage(
+                blankInterviewClip, interview_start_time = sherpaUtils.current_interview_footage(
                     data=json_file,
                     clip_timeline=cutaway_timeline
                 )
 
                 # Difference between the main timeline and the starting time line
-                dif = cutaway_timeline-interviewStartTime
+                dif = cutaway_timeline-interview_start_time
 
                 print("Interview clip starts at {}, Blank clip starts at {}, so difference is {}".format(
-                    interviewStartTime,
+                    interview_start_time,
                     cutaway_timeline,
                     dif)
                 )
@@ -123,22 +157,34 @@ def render_video(user, json_data=None, html_render=False):
                 )
                 print("Sub clip starts at {}, ends at {}".format(subClipStart, subClipEnd))
 
-                # Create clip with parameterised start and end times
-                clip = generateEffects.generate_clip(
-                    clip_data=interviewClipMeta,
-                    user=user,
-                    start=subClipStart,
-                    end=subClipEnd
-                )
-            # No clip can be found, generate a blank
+                interview_clip_type = interviewClipMeta.get('clipType')
+
+                if interview_clip_type == "Interview":
+                    # Create clip with parameterised start and end times
+                    clip = generateEffects.generate_clip(
+                        clip_data=interviewClipMeta,
+                        user=user,
+                        start=subClipStart,
+                        end=subClipEnd
+                    )
+            
+                elif interview_clip_type == "Blank":
+                    clip = generateEffects.generate_blank(interviewClipMeta)
+
+            # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
                 print("TypeError - No clip found")
                 clip = generateEffects.generate_blank(clip_data)
+                # Look for the clip caption data
+                captionData = sherpaUtils.open_clip_caption_data(data=json_file,clip=clip_name)
+
+                # Append here if it's needed
+                if captionData is not 0:
+                    caption = generateEffects.generate_text_caption(captionData, clip_data)
+                    clip = CompositeVideoClip([clip, caption])
+
                 top_audio.insert(clip_data.get('order'), clip.audio)
-            # Clip can be found, but no caption data
-            #except KeyError:
-                #print("KeyError - No caption data found")
-                #interviewClipCaption = 0
+                    
             # We want this code to run only if we get in the try loop
             # So we use 'finally'
             finally:
@@ -155,7 +201,7 @@ def render_video(user, json_data=None, html_render=False):
 
         cutaway_timeline += clip.duration
         video_list.insert(clip_data.get('order')-1, clip)
-    
+    """
     # Following all the cut away clips, we need to make sure any hangover interviwe clips are accounted for
     print("Total cut away timeline comes to {}.".format(cutaway_timeline))
 
@@ -207,6 +253,8 @@ def render_video(user, json_data=None, html_render=False):
                 clip = CompositeVideoClip([clip, caption])
 
         video_list.insert(clip_data.get('order')+order_shift_number-1, clip)
+
+    """
     # Printout at end
     print(video_list)
 
@@ -244,6 +292,4 @@ def render_video(user, json_data=None, html_render=False):
 
         print("Completed in {} seconds.".format(time.time() - start_time))
 
-
-project = input("Enter 1100: ")
-render_video(project)
+render_video("1100")

@@ -166,3 +166,19 @@ def interview_audio_builder(interview_data, user):
             sound_builder.append(audio)
 
     return sound_builder
+
+
+def better_generate_text_caption(clip_name):
+    """
+    clip_name: dict --> The json name for the clip
+
+    Function is designed to take in the info for the clip, read the caption data for the clip,
+    generate the caption, and return it
+
+    This function also handles any error with no caption being found
+    """
+    pass
+
+    
+    #try:
+        #caption_data = sherpaUtils.open_caption_data(clip_name)
