@@ -76,7 +76,7 @@ def render_video(user, html_render=False):
                     "clipType": "Blank"
                 },
                 "edit": {
-                    
+
                 }
             }
         }
@@ -262,4 +262,4 @@ def render_video(user, html_render=False):
         finished_video.close
         print("Completed in {} seconds.".format(time.time() - start_time))
 
-render_video("1149")
+render_video("750")
