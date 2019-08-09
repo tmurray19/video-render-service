@@ -85,7 +85,7 @@ def render_video(user, html_render=False):
         smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_lenght, interview_timeline_length)
 
 
-    # Automated all the clips
+    # Automated all the clips - Run through all the cutaway footage
     for clip_name in json_file['CutAwayFootage']:
 
         # Testing printout
@@ -93,39 +93,31 @@ def render_video(user, html_render=False):
         print("Cutaway Timeline: {}".format(cutaway_timeline))
 
         # Initialise clip data first
-        clip_data = sherpaUtils.open_clip_meta_data(data=json_file, clip=clip_name)
-        #clip_data = sherpaUtils.open_clip_data(data=json_file, clip=clip_name)
+        clip_data = json_file['CutAwayFootage'][clip_name]
 
-        clip_type = clip_data.get('clipType')
+        clip_type = clip_data['Meta'].get('clipType')
 
         # If its a cutaway, just generate the clip and add a caption if it exists
         if clip_type == "CutAway":
             print(clip_name + " is a cutaway.")
-            clip = generateEffects.generate_clip(clip_data=clip_data, user=user)
-            top_audio.insert(clip_data.get('order'), clip.audio)
-
-            # Look for the clip caption data
-            captionData = sherpaUtils.open_clip_caption_data(data=json_file,clip=clip_name)
-
-            # Append here if it's needed
-            if captionData is not 0:
-                caption = generateEffects.generate_text_caption(captionData, clip_data)
-                clip = CompositeVideoClip([clip, caption])
+            clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user)
+            # Generate caption data
+            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
+            top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
         # Generate image
         elif clip_type == "Image":
             print(clip_name + " is an image.")
-            clip = generateEffects.generate_image_clip(clip_data, user)
-            top_audio.insert(clip_data.get('order'), clip.audio)
+            clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
+            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
+            top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
         # If it's a blank
         elif clip_type == "Blank":
             try:
                 print(clip_name + " is a blank.")
 
-                interviewClipCaption = 0
-
-                blankInterviewClip, interview_start_time = sherpaUtils.current_interview_footage(
+                relevant_interview_clip_data, interview_start_time = sherpaUtils.current_interview_footage(
                     data=json_file,
                     clip_timeline=cutaway_timeline
                 )
@@ -139,17 +131,11 @@ def render_video(user, html_render=False):
                     dif)
                 )
 
-                interviewClipMeta = blankInterviewClip['Meta']
-
-                # Create caption and clip data for interview
-                try:
-                    interviewClipCaption = blankInterviewClip['edit']['Caption']
-                except KeyError:
-                    interviewClipCaption = 0
+                interviewClipMeta = relevant_interview_clip_data['Meta']
 
                 subClipStart = (interviewClipMeta.get('startTime')) + dif
                 subClipEnd = (interviewClipMeta.get('startTime')) + dif + (
-                        (clip_data.get('endTime')) - (clip_data.get('startTime'))
+                        (clip_data['Meta'].get('endTime')) - (clip_data['Meta'].get('startTime'))
                 )
                 print("Sub clip starts at {}, ends at {}".format(subClipStart, subClipEnd))
 
@@ -163,40 +149,27 @@ def render_video(user, html_render=False):
                         start=subClipStart,
                         end=subClipEnd
                     )
-            
+
+                    clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
+
                 elif interview_clip_type == "Blank":
                     clip = generateEffects.generate_blank(interviewClipMeta)
+                    clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
                 print("TypeError - No clip found")
                 clip = generateEffects.generate_blank(clip_data)
-                # Look for the clip caption data
-                captionData = sherpaUtils.open_clip_caption_data(data=json_file,clip=clip_name)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
-                # Append here if it's needed
-                if captionData is not 0:
-                    caption = generateEffects.generate_text_caption(captionData, clip_data)
-                    clip = CompositeVideoClip([clip, caption])
+                top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
-                top_audio.insert(clip_data.get('order'), clip.audio)
-                    
-            # We want this code to run only if we get in the try loop
-            # So we use 'finally'
-            finally:
-                if interviewClipCaption is not 0:
-                    caption = generateEffects.generate_text_caption(
-                        interviewClipCaption,
-                        interviewClipMeta,
-                        dur=subClipEnd - subClipStart
-                    )
-                    clip = CompositeVideoClip([clip, caption])
 
         # Insert clip into correct position in array
-        print("Inserted {} into pos {}.".format(clip_data.get('name'), clip_data.get('order')-1))
+        print("Inserted {} into pos {}.".format(clip_data['Meta'].get('name'), clip_data['Meta'].get('order')-1))
 
         cutaway_timeline += clip.duration
-        video_list.insert(clip_data.get('order')-1, clip)
+        video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
     # Printout at end
     print(video_list)
@@ -234,5 +207,3 @@ def render_video(user, html_render=False):
         )
 
         print("Completed in {} seconds.".format(time.time() - start_time))
-
-render_video("1100")

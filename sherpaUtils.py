@@ -74,16 +74,6 @@ def open_cut_away(data):
     return clip_data
 
 
-def open_clip_data(data, clip):
-    """
-    data: dict --> The json data to be searching through
-    clip: string --> The name of the dictionary entry (clip) to be searching for
-
-    Returns the entire clip data, the meta and the edit data for a clip
-    """
-    clip_data = data['CutAwayFootage']
-
-
 def open_clip_meta_data(data, clip):
     """
     Opens and reads the metadata from a given JSON file name

@@ -176,42 +176,39 @@ def interview_audio_builder(interview_data, user):
     return sound_builder
 
 
-def better_generate_text_caption(clip_name):
+def better_generate_text_caption(clip, edit_data):
     """
-    clip_name: dict --> The json name for the clip
+    clip: moviepy clip --> The clip you wish to add the text too
+    caption_data: dict --> The JSON/Dictionry data of the caption you want to add
 
     Function is designed to take in the info for the clip, read the caption data for the clip,
     generate the caption, and return it
 
-    This function also handles any error with no caption being found
+    This function also handles any error with no caption being found.
+
+    (Code should first try to look)
     """
-    clip_data = 0
-    caption_data = 0
+    try:
+        caption_data = edit_data['Caption']
 
-    start = (clip_data.get('startTime'))
-    end = (clip_data.get('endTime'))
+        # TODO: Change
+        dur = max(1, clip.duration - 2)
+    
+        # Define Text Data
+        text_caption = myp.TextClip(
+            txt=caption_data.get('text'),
+            fontsize=caption_data.get('fontSize'),
+            color=caption_data.get('fontColour'),
+        )
 
-    dur = end - start
+        text_caption = text_caption.set_position(
+            positions[caption_data.get('screenPos')]).set_duration(dur)
+        
+        
+        clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
+    
+        return clip
 
-    blank_clip = myp.ColorClip(
-        size=[1920, 1080],
-        color=(0, 0, 0),
-        duration=dur
-    )
-
-    # Can be removed later
-    text_caption = myp.TextClip(
-        txt="This is a blank",
-        color="White",
-        fontsize=72
-    )
-
-    text_caption = text_caption.set_position('center').set_duration(dur)
-
-    blank_clip = myp.CompositeVideoClip([blank_clip, text_caption])
-
-    audio = myp.AudioFileClip(silence_path)
-
-    blank_clip = blank_clip.set_audio(audio.set_duration(dur))
-
-    return blank_clip
+    except Exception as e:
+        print(e)
+        return clip
