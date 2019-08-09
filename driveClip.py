@@ -206,7 +206,7 @@ def render_video(user, html_render=False):
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
                 print("TypeError - No clip found")
-                clip = generateEffects.generate_blank(clip_data['Meta'])
+                clip = generateEffects.generate_blank(clip_data)
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
                 top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
