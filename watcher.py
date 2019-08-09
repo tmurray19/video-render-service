@@ -37,7 +37,7 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
 
-        elif event.event_type == 'created':
+        elif event.event_type == 'modified':
             time.sleep(1)
             # Take any action here when a file is first created.
             print("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
