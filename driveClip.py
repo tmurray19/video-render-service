@@ -200,12 +200,13 @@ def render_video(user, html_render=False):
                     print("Total insert length {}".format(total_insert_length))
 
                     clip = concatenate_videoclips([clip, next_clip])
+                    next_clip.close
                     
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
                 print("TypeError - No clip found")
-                clip = generateEffects.generate_blank(clip_data)
+                clip = generateEffects.generate_blank(clip_data['Meta'])
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
                 top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -258,4 +259,4 @@ def render_video(user, html_render=False):
         finished_video.close
         print("Completed in {} seconds.".format(time.time() - start_time))
 
-#render_video("test")
+render_video("1149")
