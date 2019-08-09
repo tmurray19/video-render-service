@@ -34,11 +34,14 @@ sizes = {
 
 # Generate a blank image
 # Add text right now just for clarity sake
-def generate_blank(clip_data):
+def generate_blank(clip_data, start=None, end=None):
 
-    start = (clip_data.get('startTime'))
-    end = (clip_data.get('endTime'))
+    if start is None:
+        start = (clip_data.get('startTime'))
 
+    if end is None:
+        end = (clip_data.get('endTime'))
+        
     dur = end - start
 
     blank_clip = myp.ColorClip(
@@ -46,17 +49,6 @@ def generate_blank(clip_data):
         color=(0, 0, 0),
         duration=dur
     )
-
-    # Can be removed later
-    text_caption = myp.TextClip(
-        txt="This is a blank",
-        color="White",
-        fontsize=72
-    )
-
-    text_caption = text_caption.set_position('center').set_duration(dur)
-
-    blank_clip = myp.CompositeVideoClip([blank_clip, text_caption])
 
     audio = myp.AudioFileClip(silence_path)
 
@@ -94,32 +86,6 @@ def generate_clip(clip_data, user, start=None, end=None):
     return clip
 
 
-def generate_text_caption(caption_data, clip_data, dur=None):
-    if dur is None:
-        dur = (clip_data.get('endTime')) - (clip_data.get('startTime'))
-
-    # Define Text Data
-    text_caption = myp.TextClip(
-        txt=caption_data.get('text'),
-        fontsize=caption_data.get('fontSize'),
-        color=caption_data.get('fontColour'),
-    )
-
-    # Define duration in case it
-    # goes past the length of the clip
-    # Although may not be necessary
-    caption_duration = dur
-
-    # Define completed text caption
-    # Position taken from one of 9 possible locations
-    text_caption = text_caption.set_position(
-        positions[caption_data.get('screenPos')]).set_duration(caption_duration)
-
-    print("Text caption '{}' for video '{}' has been generated.".format(caption_data.get('text'), clip_data.get('name')))
-
-    return text_caption
-
-
 # Generates an image clip based on json data
 def generate_image_clip(clip_data, user):
     """'name' in this case refers to related file name of image"""
@@ -137,11 +103,6 @@ def generate_image_clip(clip_data, user):
     print("Image clip successfully generated.")
 
     return image_clip
-
-
-# For reference
-def add_audio_to_clip(clip_data, audio_data):
-    return clip_data.set_audio(audio_data)
 
 
 def interview_audio_builder(interview_data, user):

@@ -144,7 +144,7 @@ def calculate_clip_length(clip_data):
 def current_interview_footage(data, clip_timeline):
     interview_runtime = 0
 
-    interview_data = open_interview(data)
+    interview_data = data['InterviewFootage']
     # Check all the items in the interview data
     for item in interview_data:
         # Check the function above for calculating clip length
@@ -155,8 +155,6 @@ def current_interview_footage(data, clip_timeline):
         if interview_runtime > clip_timeline:
             # Return the clip, its start time in the interview timeline, and its endtime
             return interview_data[item], interview_runtime - clip_length
-        #print("We got here with item '{}'".format(item))
-        #del interview_data[item]
     # Should only get here if no suitable clip has been found
     raise TypeError("No clip has been found")
 
@@ -212,6 +210,13 @@ def calculate_time_at_clip(clip_data, clip_timeline_data, timeline_len=None):
     return runtime
 
 
-def open_caption_data(clip):
-    edit = clip['edit']['Caption']
-    return edit
+def give_clip_order(clip_order, json_data):
+    """
+    clip_order: int --> The order of the clip you're looking for
+    
+    Function for finding the file or files for replacing a blank in the cut away timeline with, if they exist
+    
+    Return list of clips to be inserted"""
+    for item in json_data:
+        if json_data[item]['Meta'].get('order') == clip_order:
+            return json_data[item]
