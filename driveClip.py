@@ -74,6 +74,9 @@ def render_video(user, html_render=False):
                     "audioLevel": 1,
                     "order": len(json_file[smallest_timeline])+1,
                     "clipType": "Blank"
+                },
+                "edit": {
+                    
                 }
             }
         }
