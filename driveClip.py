@@ -16,7 +16,7 @@ def correct_timeline():
 
 
 
-def render_video(user, html_render=False):
+def render_video(user, compress_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
     json_data: String -> The path to the JSON data 
@@ -128,7 +128,7 @@ def render_video(user, html_render=False):
         if clip_type == "CutAway":
             print(clip_name + " is a cutaway.")
             logging.debug(clip_name + " is a cutaway.")
-            clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user)
+            clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render)
             # Generate caption data
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -196,39 +196,67 @@ def render_video(user, html_render=False):
                 interview_clip_type = interview_clip_meta_data.get('clipType')
 
                 if interview_clip_type == "Interview":
+                    logging.debug("Replacing blank {} with interview clip {}".format(
+                        clip_data['Meta'].get('name'),
+                        interview_clip_meta_data.get('name')
+                    ))
                     # Create clip with parameterised start and end times
                     clip = generateEffects.generate_clip(
                         clip_data=interview_clip_meta_data,
                         user=user,
                         start=sub_clip_start,
-                        end=sub_clip_end
+                        end=sub_clip_end,
+                        compressed=compress_render
                     )
 
                     clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
                 elif interview_clip_type == "Blank":
-                    clip = generateEffects.generate_blank(interview_clip_meta_data, start=sub_clip_start, end=sub_clip_end)
+                    
+                    logging.debug("Replacing blank {} with interview clip {}".format(
+                        clip_data['Meta'].get('name'),
+                        interview_clip_meta_data.get('name')
+                    ))
+                    clip = generateEffects.generate_blank(interview_clip_meta_data, start=sub_clip_start, end=sub_clip_end, compressed=compress_render)
                     clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
                 total_insert_length = round(total_insert_length, 3)
 
                 while total_insert_length != cutaway_blank_len:
+                    logging.debug("Clip length didn't suffice for blank, adding more files as necessary")
+                    print("Clip length didn't suffice for blank, adding more files as necessary")
+
+                    time_to_fill = cutaway_blank_len - total_insert_length
+
+                    logging.debug("Time left to fill is {}".format(time_to_fill))
 
                     interview_clip_ord+=1
 
                     next_clip_data = sherpaUtils.give_clip_order(interview_clip_ord, json_file['InterviewFootage'])
+                    print(next_clip_data)
+
+                    # Clip should be the the same size as the time to fill if possible
+                    # But it's also possible that the next clip isn't bi enough either
+                    # So we'll need to go further on
+                    # To stop bugs, we need to set our end time as either the time left to fill, or the length of the clip
+                    end_time = min(
+                        next_clip_data['Meta'].get('startTime') + time_to_fill,
+                        sherpaUtils.calculate_clip_length(next_clip_data['Meta'])
+                    )
+
 
                     if next_clip_data['Meta'].get('clipType') == "Interview":
-
                         next_clip = generateEffects.generate_clip(
                             clip_data=next_clip_data['Meta'],
-                            user=user
+                            end=end_time,
+                            user=user,
+                            compressed=compress_render
                         )
     
                         next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'])
     
                     elif next_clip_data['Meta'].get('clipType') == "Blank":
-                        next_clip = generateEffects.generate_blank(next_clip_data['Meta'])
+                        next_clip = generateEffects.generate_blank(next_clip_data['Meta'], end=end_time, compressed=compress_render)
                         next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'])
 
                     total_insert_length += next_clip.duration
@@ -240,7 +268,7 @@ def render_video(user, html_render=False):
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
                 logging.debug("TypeError in render - No clip found")
-                clip = generateEffects.generate_blank(clip_data['Meta'])
+                clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
                 top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -286,27 +314,28 @@ def render_video(user, html_render=False):
     finished_video = finished_video.set_audio(finished_audio)
 
     # Returns html render of video if true
+    """    
     if html_render is True:
         low_quality = finished_video.resize(0.5)
         return html_tools.html_embed(low_quality, rd_kwargs={'fps': 15, 'bitrate': '300k'})
-
+    """
     # Otherwise full renders
-    else:
-        logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
-        # Render the finished project out into an mp4
-        finished_video.write_videofile(
-            os.path.join(
-                attach_dir,
-                user,
-                user + "_edited.mp4"
-            )
+    #else:
+    logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
+    # Render the finished project out into an mp4
+    finished_video.write_videofile(
+        os.path.join(
+            attach_dir,
+            user,
+            user + "_edited.mp4"
         )
+    )
 
-        top_audio.close
-        bottom_audio.close
-        finished_audio.close
-        finished_video.close
-        logging.debug("Completed in {} seconds".format(time.time() - start_time))
-        logging.debug("Closing render instance")
+    top_audio.close
+    bottom_audio.close
+    finished_audio.close
+    finished_video.close
+    logging.debug("Completed in {} seconds".format(time.time() - start_time))
+    logging.debug("Closing render instance")
 
-render_video("1149")
+render_video("test")
