@@ -149,6 +149,8 @@ def render_video(user, html_render=False):
                 logging.debug(clip_name + " is a blank.")
                 # We need to find the clip that should be playing in the interview timeline
 
+                cutaway_blank_len = sherpaUtils.calculate_clip_length(clip_data['Meta'])
+
                 relevant_interview_clip_data, interview_start_time = sherpaUtils.current_interview_footage(
                     data=json_file,
                     clip_timeline=cutaway_timeline
@@ -208,7 +210,9 @@ def render_video(user, html_render=False):
                     clip = generateEffects.generate_blank(interview_clip_meta_data, start=sub_clip_start, end=sub_clip_end)
                     clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
-                while total_insert_length != sherpaUtils.calculate_clip_length(clip_data['Meta']):
+                total_insert_length = round(total_insert_length, 3)
+
+                while total_insert_length != cutaway_blank_len:
 
                     interview_clip_ord+=1
 

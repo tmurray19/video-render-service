@@ -221,3 +221,7 @@ def give_clip_order(clip_order, json_data):
         if json_data[item]['Meta'].get('order') == clip_order:
             return json_data[item]
             
+
+def truncate(n, decimals=0):
+    multiplier = 10 ** decimals
+    return int(n * multiplier) / multiplier
