@@ -6,6 +6,10 @@ import os
 class Config(object):
     # TODO: Change this location to the azure file share mount location
     DIR_LOCATION = os.environ.get('DIR_LOCATION') or "/mnt/csae48d5df47deax41bcxbaa/videos"
+    #DIR_LOCATION = os.environ.get('DIR_LOCATION') or "D:/project"
+    LOG_PARENT = os.environ.get('LOG_PARENT') or "logFiles"
+    WATCHER_LOG = os.environ.get('WATCHER_LOG') or 'renderWatcher'
+    RENDER_LOG = os.environ.get('RENDER_LOG') or 'renderService'
     #DIR_LOCATION = os.environ.get('DIR_LOCATION') or "G:/project"
     # Defining storage name and key
     STORAGE_ACCOUNT_NAME = os.environ.get('STORAGE_ACCOUNT_NAME') or 'csae48d5df47deax41bcxbaa'
