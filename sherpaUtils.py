@@ -213,10 +213,11 @@ def calculate_time_at_clip(clip_data, clip_timeline_data, timeline_len=None):
 def give_clip_order(clip_order, json_data):
     """
     clip_order: int --> The order of the clip you're looking for
+    json_data: dict --> The data to be searching through
     
-    Function for finding the file or files for replacing a blank in the cut away timeline with, if they exist
-    
-    Return list of clips to be inserted"""
+    Function for finding a clip in a file, given its order
+    """
     for item in json_data:
         if json_data[item]['Meta'].get('order') == clip_order:
             return json_data[item]
+            
