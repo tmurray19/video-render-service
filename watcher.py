@@ -43,7 +43,7 @@ class Handler(FileSystemEventHandler):
             return None
 
         # Windows is created
-        # Linxu is modified
+        # Linux is modified
         elif event.event_type == 'modified':
             time.sleep(1)
             # Take any action here when a file is first created.
@@ -66,7 +66,7 @@ class Handler(FileSystemEventHandler):
                 logging.debug("Project ID is {}".format(proj_id))
                 try:
                     logging.debug("Starting render serivce")
-                    driveClip.render_video(proj_id)
+                    driveClip.render_video(proj_id, compress_render=json_data["compress_render"])
                 except OSError as e:
                     logging.error("Error: {}".format(e))
                     if e.errno == 6:
