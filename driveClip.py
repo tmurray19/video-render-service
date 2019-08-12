@@ -1,6 +1,7 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
 from moviepy.video.io import html_tools
 from config import Config
+from datetime import datetime
 import generateEffects, sherpaUtils, os, time, logging
 
 
@@ -21,6 +22,21 @@ def render_video(user, html_render=False):
     json_data: String -> The path to the JSON data 
     html_render: Bool -> Set to true if you want this function to return html code of the render
     """
+
+    log_file_name = os.path.join(
+        Config.DIR_LOCATION, 
+        Config.LOG_PARENT, 
+        Config.RENDER_LOG, 
+        datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_instance.log"
+    )
+
+    logging.basicConfig(
+        level=logging.DEBUG, 
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename=log_file_name)
+    logging.debug("Beginning render instance")
+
     # For logging
     start_time = time.time()
 
@@ -40,13 +56,13 @@ def render_video(user, html_render=False):
     cutaway_timeline_length = sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage'])
     interview_timeline_length = sherpaUtils.calculate_timeline_length(json_file['InterviewFootage'])
 
-    print("Cutaway length: {}s      Interview length: {}s".format(cutaway_timeline_length, interview_timeline_length))
+    logging.debug("Cutaway length: {}s      Interview length: {}s".format(cutaway_timeline_length, interview_timeline_length))
 
     # Find the smallest timeline length
     smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
     
     if smallest_timeline == "CutAwayFootage":
-        print("Smallest timeline is currently the Cut Away Timeline, correcting timelines as necessary")
+        logging.debug("Smallest timeline is currently the Cut Away Timeline, correcting timelines as necessary")
         blank_no = 1
 
     # While the smallest timeline is the cut away timeline
@@ -82,15 +98,15 @@ def render_video(user, html_render=False):
         }
 
         blank_no += 1
-        print(end_of_line_blank)
+        logging.debug(blank_name + ":")
+        logging.debug(end_of_line_blank)
         # Insert it into the timeline
         json_file[smallest_timeline].update(end_of_line_blank)
 
         # Update the length
         cutaway_timeline_length += blank_len
-        print("Cutaway length: {}, Inteview length: {}".format(cutaway_timeline_length, interview_timeline_length))
+        logging.debug("Cutaway length: {}, Inteview length: {}".format(cutaway_timeline_length, interview_timeline_length))
             
-        print(cutaway_timeline_length<interview_timeline_length)
         smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
 
 
@@ -100,6 +116,8 @@ def render_video(user, html_render=False):
         # Testing printout
         print(clip_name + ":")
         print("Cutaway Timeline: {}".format(cutaway_timeline))
+        logging.debug(clip_name + ":")
+        logging.debug("Cutaway Timeline: {}".format(cutaway_timeline))
 
         # Initialise clip data first
         clip_data = json_file['CutAwayFootage'][clip_name]
@@ -109,6 +127,7 @@ def render_video(user, html_render=False):
         # If its a cutaway, just generate the clip and add a caption if it exists
         if clip_type == "CutAway":
             print(clip_name + " is a cutaway.")
+            logging.debug(clip_name + " is a cutaway.")
             clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user)
             # Generate caption data
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
@@ -117,6 +136,7 @@ def render_video(user, html_render=False):
         # Generate image
         elif clip_type == "Image":
             print(clip_name + " is an image.")
+            logging.debug(clip_name + " is an image.")
             clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -126,6 +146,7 @@ def render_video(user, html_render=False):
             total_insert_length = 0
             try:
                 print(clip_name + " is a blank.")
+                logging.debug(clip_name + " is a blank.")
                 # We need to find the clip that should be playing in the interview timeline
 
                 relevant_interview_clip_data, interview_start_time = sherpaUtils.current_interview_footage(
@@ -140,16 +161,22 @@ def render_video(user, html_render=False):
                 # Difference between the main timeline and the starting time line
                 dif = cutaway_timeline-interview_start_time
 
-                """
+                
+                logging.debug("Interview clip starts at {}, Blank clip starts at {}, so difference is {}".format(
+                    interview_start_time,
+                    cutaway_timeline,
+                    dif)
+                )
+
                 print("Interview clip starts at {}, Blank clip starts at {}, so difference is {}".format(
                     interview_start_time,
                     cutaway_timeline,
                     dif)
                 )
-                """
+                
 
                 # Define clip length
-                clip_dur = sherpaUtils.calculate_clip_length(interview_clip_meta_data)
+                clip_dur = sherpaUtils.calculate_clip_length(clip_data['Meta'])
 
                 sub_clip_start = (interview_clip_meta_data.get('startTime')) + dif
                 # Get end of clip or end of blank, whichever comes first
@@ -159,6 +186,7 @@ def render_video(user, html_render=False):
                 )
 
                 print("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
+                logging.debug("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
 
                 sub_clip_length = sub_clip_end - sub_clip_start
                 total_insert_length += sub_clip_length
@@ -200,15 +228,14 @@ def render_video(user, html_render=False):
                         next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'])
 
                     total_insert_length += next_clip.duration
+                    logging.debug("Total insert length {}".format(total_insert_length))
                     print("Total insert length {}".format(total_insert_length))
 
                     clip = concatenate_videoclips([clip, next_clip])
-                    next_clip.close
-                    
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
-                print("TypeError - No clip found")
+                logging.debug("TypeError in render - No clip found")
                 clip = generateEffects.generate_blank(clip_data['Meta'])
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
@@ -216,13 +243,15 @@ def render_video(user, html_render=False):
 
 
         # Insert clip into correct position in array
+        logging.debug("Inserted {} into pos {}.".format(clip_data['Meta'].get('name'), clip_data['Meta'].get('order')-1))
         print("Inserted {} into pos {}.".format(clip_data['Meta'].get('name'), clip_data['Meta'].get('order')-1))
 
         cutaway_timeline += clip.duration
         video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
     # Printout at end
-    print(video_list)
+    logging.debug("Video list")
+    logging.debug(video_list)
 
     # Create audio from the interview Footage
     bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
@@ -230,10 +259,23 @@ def render_video(user, html_render=False):
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)
 
-    bottom_audio = concatenate_audioclips(bottom_audio)
 
-    finished_audio = CompositeAudioClip([top_audio, bottom_audio])
+    music = generateEffects.open_music_clip(user)
+    try:
+        bottom_audio = concatenate_audioclips(bottom_audio)
 
+        finished_audio = CompositeAudioClip([top_audio, bottom_audio])
+    except Exception as e:
+        logging.debug("Exception occured in render")
+        logging.debug(e)
+        finished_audio = top_audio
+    
+    try:
+        finished_audio = CompositeAudioClip([top_audio, music])
+    except Exception as e:
+        logging.debug("Exception occured in render:")
+        logging.debug(e)
+        finished_audio = top_audio
 
     # Concatenate the video files together
     finished_video = concatenate_videoclips(video_list)
@@ -246,13 +288,13 @@ def render_video(user, html_render=False):
 
     # Otherwise full renders
     else:
-        print("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
+        logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
         # Render the finished project out into an mp4
         finished_video.write_videofile(
             os.path.join(
                 attach_dir,
                 user,
-                sherpaUtils.get_proj_name(data=json_file) + "_edited.mp4"
+                user + "_edited.mp4"
             )
         )
 
@@ -260,6 +302,7 @@ def render_video(user, html_render=False):
         bottom_audio.close
         finished_audio.close
         finished_video.close
-        print("Completed in {} seconds.".format(time.time() - start_time))
+        logging.debug("Completed in {} seconds".format(time.time() - start_time))
+        logging.debug("Closing render instance")
 
-render_video("750")
+render_video("1149")
