@@ -34,7 +34,7 @@ sizes = {
 
 # Generate a blank image
 # Add text right now just for clarity sake
-def generate_blank(clip_data, start=None, end=None):
+def generate_blank(clip_data, start=None, end=None, compressed=False):
 
     if start is None:
         start = (clip_data.get('startTime'))
@@ -44,8 +44,11 @@ def generate_blank(clip_data, start=None, end=None):
         
     dur = end - start
 
+    
+    vid_size = [582, 480] if compressed else [1920, 1080]
+
     blank_clip = myp.ColorClip(
-        size=[1920, 1080],
+        size=vid_size,
         color=(0, 0, 0),
         duration=dur
     )
@@ -57,9 +60,9 @@ def generate_blank(clip_data, start=None, end=None):
     return blank_clip
 
 
-def generate_clip(clip_data, user, start=None, end=None):
+def generate_clip(clip_data, user, start=None, end=None, compressed=False):
     """Generates clip data directly, without calling sherpaUtils within function"""
-    related_file_name = clip_data.get('name')+".mp4"
+    related_file_name = clip_data.get('name')+"_com.mp4" if compressed else clip_data.get('name')+".mp4"
 
     if start is None:
         start = (clip_data.get('startTime'))
@@ -75,8 +78,10 @@ def generate_clip(clip_data, user, start=None, end=None):
 
     # Reduce volume defined in data
     clip = clip.volumex(clip_data.get('audioLevel'))
-
-    clip = clip.resize((1920, 1080))
+    
+    if not compressed:
+        clip = clip.resize((1920, 1080)) 
+    
     print("clip length: {}".format(clip.duration))
 
     if clip.audio is None:
