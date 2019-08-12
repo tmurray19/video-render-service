@@ -12,15 +12,15 @@ silence_path = os.path.join(Config.DIR_LOCATION, Config.RESOURCE_PATH, Config.SI
 attach_dir = Config.DIR_LOCATION
 
 positions = {
-    0: ("left", "top"),  # Top Left
-    1: ("right", "top"),  # Top Right
-    2: ("center", "top"),  # Top center
-    3: ("left", "center"),  # Center left
-    4: "center",  # Center of image
-    5: ("right", "center"),  # Center right
-    6: ("left", "bottom"),  # Center left
-    7: ("center", "bottom"),  # Center bottom
-    8: ("right", "bottom")  # Center right
+    1: ("left", "top"),  # Top Left
+    2: ("right", "top"),  # Top Right
+    3: ("center", "top"),  # Top center
+    4: ("left", "center"),  # Center left
+    5: "center",  # Center of image
+    6: ("right", "center"),  # Center right
+    7: ("left", "bottom"),  # Center left
+    8: ("center", "bottom"),  # Center bottom
+    9: ("right", "bottom")  # Center right
 }
 
 sizes = {
@@ -173,3 +173,15 @@ def better_generate_text_caption(clip, edit_data):
     except Exception as e:
         print(e)
         return clip
+        
+
+
+def open_music_clip(music_choice):
+    """
+    music_choice: string --> Which music file to open
+
+    For opening the music clip
+    """
+    #music = myp.AudioFileClip(music_choice)
+
+    return 0
