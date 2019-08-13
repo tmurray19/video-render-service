@@ -24,8 +24,7 @@ def render_video(user, compress_render=False):
     """
 
     log_file_name = os.path.join(
-        Config.DIR_LOCATION, 
-        Config.LOG_PARENT, 
+        Config.LOGS_LOCATION,
         Config.RENDER_LOG, 
         datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_instance.log"
     )

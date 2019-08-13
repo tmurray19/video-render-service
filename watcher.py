@@ -97,9 +97,8 @@ if __name__ == '__main__':
 
 
     log_file_name = os.path.join(
-        Config.DIR_LOCATION, 
-        Config.LOG_PARENT, 
-        Config.WATCHER_LOG, 
+        Config.LOGS_LOCATION,
+        Config.WATCHER_LOGs, 
         datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_watcher_instance.log"
     )
 
