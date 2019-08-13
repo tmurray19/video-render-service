@@ -66,7 +66,7 @@ class Handler(FileSystemEventHandler):
                 logging.debug("Project ID is {}".format(proj_id))
                 try:
                     logging.debug("Starting render serivce")
-                    driveClip.render_video(proj_id, compress_render=json_data["compress_render"])
+                    driveClip.render_video(proj_id, compress_render=json_data["compressedRender"])
                 except OSError as e:
                     logging.error("Error: {}".format(e))
                     if e.errno == 6:
