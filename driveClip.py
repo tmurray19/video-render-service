@@ -328,7 +328,7 @@ def render_video(user, compress_render=False):
                 ), 
                 threads=8,
                 preset="ultrafast",
-                bitrate="150k",
+                bitrate="250k",
 
         )
     else:
