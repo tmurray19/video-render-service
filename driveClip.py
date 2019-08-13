@@ -319,13 +319,27 @@ def render_video(user, compress_render=False):
 
     logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
     # Render the finished project out into an mp4
-    finished_video.write_videofile(
-        os.path.join(
-            attach_dir,
-            user,
-            vid_name
+    if compress_render:
+        finished_video.write_videofile(
+            os.path.join(
+                attach_dir,
+                user,
+                vid_name
+                ), 
+                codec="libvpx",
+                threads=8,
+                preset="ultrafast",
+                bitrate="150k",
+
         )
-    )
+    else:
+        finished_video.write_videofile(
+            os.path.join(
+                attach_dir,
+                user,
+                vid_name
+            )
+        )
 
     top_audio.close
     bottom_audio.close
