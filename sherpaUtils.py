@@ -2,6 +2,7 @@ import os
 import azureFileTransfer
 import json
 from config import Config
+import logging
 
 # Defining the location of the Azure File Share and the name of the json file to look for in a given project
 attach_dir = Config.DIR_LOCATION
@@ -21,115 +22,6 @@ def open_proj(id):
         data = json.load(jfile)
 
     return data
-
-
-def open_interview(data):
-    """
-    Data: dict --> The JSON data, opened as a dictionary using json.load
-
-    Returns the interview data found in the json file
-    """
-    interview_data = data['InterviewFootage']
-    return interview_data
-
-
-# Pass the json file through this data
-def open_interview_meta_data(data, clip):
-    """
-    data: dict --> The entire JSON data
-    clip: string --> The name of the Clip dictionary within the json data you're searching for
-
-    Returns the meta metadata for the interview track of the json file
-    """
-    # Read JSON File Name and load file
-    interview_data = data['InterviewFootage']
-    return interview_data[clip]['Meta']
-
-
-# Pass the json file through this data
-def open_interview_edit_data(data, clip):
-    """Reads edit data for the interview track of the json file"""
-    try:
-        interview_data = data['InterviewFootage']
-        return interview_data[clip]['edit']
-    except KeyError:
-        print("No edit data could be found for clip: {}".format(clip))
-        return 0
-
-
-def open_interview_caption_data(data, clip):
-    try:
-        """Reads caption data for interview clip in json file"""
-
-        interview_data = data['InterviewFootage']
-        return interview_data[clip]['edit']['Caption']
-    except KeyError:
-        print("Error: Clip '{}' has no Caption Data or Caption Data could not be found".format(clip))
-        return 0
-
-
-def open_cut_away(data):
-    """Opens and returns the cutaway data in the JSON file"""
-    clip_data = data['CutAwayFootage']
-    return clip_data
-
-
-def open_clip_meta_data(data, clip):
-    """
-    Opens and reads the metadata from a given JSON file name
-    :param clip: string --> Name of clip
-    :return: clip_data: dict  --> The clip data stored in JSON file
-    It returns the first element of the meta section for a given clip in the JSON file,
-    which is the entire meta data for the given file
-    """
-    # Defining common calls
-    clip_data = data['CutAwayFootage']
-
-    return clip_data[clip]['Meta']
-
-
-def open_clip_edit_data(data, clip):
-    try:
-        # Get 'edit' section of json
-        clip_data = data['CutAwayFootage']
-
-        return clip_data[clip]['edit']
-    except KeyError:
-        print("No edit data could be found for clip: {}".format(clip))
-        return 0
-
-
-def open_clip_caption_data(data, clip):
-    """
-    Opens and reads the caption data from a given JSON file name
-    Looks for an 'edit' list in the JSON file
-    :param clip: string --> Name of clip
-    :param proj_file_name: string  --> JSON file name
-    :param user: string --> Name of user accessing directory
-    :return: caption_data: dict  --> The caption data stored in JSON file
-    Searches specifically for the caption section in the edit data
-    """
-    try:
-        # Get 'edit' section of json
-        clip_data = data['CutAwayFootage']
-        return clip_data[clip]['edit']['Caption']
-
-    except KeyError:
-        print("Error: Clip '{}' has no Caption Data or Caption Data could not be found".format(clip))
-        return 0
-
-
-# Gives the name of the overall project, passing its filename through
-def get_proj_name(data):
-    proj_name = data.get('Name')
-    return proj_name
-
-
-# Sets caption duration to clip duration if one is longer than the other
-def max_duration(caption_duration, clip_duration):
-    if caption_duration > clip_duration:
-        return clip_duration
-    return caption_duration
 
 
 # Gives length of a given clip
@@ -221,7 +113,3 @@ def give_clip_order(clip_order, json_data):
         if json_data[item]['Meta'].get('order') == clip_order:
             return json_data[item]
             
-
-def truncate(n, decimals=0):
-    multiplier = 10 ** decimals
-    return int(n * multiplier) / multiplier

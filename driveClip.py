@@ -219,6 +219,7 @@ def render_video(user, compress_render=False):
                     clip = generateEffects.generate_blank(interview_clip_meta_data, start=sub_clip_start, end=sub_clip_end, compressed=compress_render)
                     clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
+                # TODO: Careful here, rounding could cause issues
                 total_insert_length = round(total_insert_length, 3)
 
                 while total_insert_length != cutaway_blank_len:
@@ -265,7 +266,7 @@ def render_video(user, compress_render=False):
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
-                logging.debug("TypeError in render - No clip found")
+                logging.debug("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
                 clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
@@ -293,7 +294,7 @@ def render_video(user, compress_render=False):
         music = generateEffects.open_music_clip(user)
         finished_audio = CompositeAudioClip([top_audio, music])
     except Exception as e:
-        logging.debug("Exception occured in render:")
+        logging.debug("Exception occured in render - during music audio building:")
         logging.debug(e)
         finished_audio = top_audio
 
@@ -301,7 +302,7 @@ def render_video(user, compress_render=False):
         bottom_audio = concatenate_audioclips(bottom_audio)
         finished_audio = CompositeAudioClip([top_audio, bottom_audio])
     except Exception as e:
-        logging.debug("Exception occured in render")
+        logging.debug("Exception occured in render - during interview audio building:")
         logging.debug(e)
         finished_audio = top_audio
 

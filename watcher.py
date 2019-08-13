@@ -22,8 +22,8 @@ class Watcher:
         try:
             while True:
                 time.sleep(5)
-                logging.debug("00 - Watcher: Sleeping")
-                print("00 - Watcher: Sleeping")
+                logging.debug("Watcher: Sleeping")
+                print("Watcher: Sleeping")
         except:
             self.observer.stop()
             logging.error("-1 - Error")
@@ -36,8 +36,8 @@ class Handler(FileSystemEventHandler):
 
     @staticmethod
     def on_any_event(event):
-        print("00 - Watcher: Event found: {}".format(event.event_type))
-        logging.debug("00 - Watcher: Event found: {}".format(event.event_type))
+        print("Watcher: Event found: {}".format(event.event_type))
+        logging.debug("Watcher: Event found: {}".format(event.event_type))
         logging.debug("Directory: {}".format(os.path.basename(event.src_path)))
         if event.is_directory:
             return None
@@ -48,7 +48,7 @@ class Handler(FileSystemEventHandler):
             time.sleep(1)
             # Take any action here when a file is first created.
             print("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
-            logging.debug("00 - Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
+            logging.debug("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
             # Testing print
             print("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
             logging.debug("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
@@ -65,16 +65,17 @@ class Handler(FileSystemEventHandler):
                 print("Project ID is {}".format(proj_id))
                 logging.debug("Project ID is {}".format(proj_id))
                 try:
-                    logging.debug("Starting render serivce")
+                    logging.debug("Starting render serivce...")
                     driveClip.render_video(proj_id, compress_render=json_data["compressedRender"])
                 except OSError as e:
                     logging.error("Error: {}".format(e))
                     if e.errno == 6:
+                        logging.error("Error is safely ignorable, continuing")
                         pass
                     else:
                         return
                 except Exception as ex:
-                    logging.error("Exception occured")
+                    logging.error("Exception occured:")
                     logging.error(ex)
                     return
                 # Update the complete time at the end and dump it to file 
@@ -93,8 +94,6 @@ class Handler(FileSystemEventHandler):
 
 
 if __name__ == '__main__':
-
-
 
     log_file_name = os.path.join(
         Config.LOGS_LOCATION,

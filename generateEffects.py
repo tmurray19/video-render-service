@@ -78,10 +78,10 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
     if not compressed:
         clip = clip.resize((1920, 1080)) 
     
-    print("clip length: {}".format(clip.duration))
+    logging.debug("clip '{}' length: {}".format(clip_data.get('name'), clip.duration))
 
     if clip.audio is None:
-        print("No clip audio found")
+        logging.error("No clip audio found for clip {}".format(clip_data.get('name')))
         audio = myp.AudioFileClip(silence_path)
         clip = clip.set_audio(audio.set_duration(end - start))
     return clip
@@ -101,7 +101,7 @@ def generate_image_clip(clip_data, user):
 
     image_clip = image_clip.set_audio(audio.set_duration(clip_data.get('duration')))
 
-    print("Image clip successfully generated.")
+    logging.debug("Image clip successfully generated.")
 
     return image_clip
 
@@ -120,6 +120,11 @@ def interview_audio_builder(interview_data, user):
                     (interview_data[item]['Meta'].get('startTime'))
                 )
             )
+            logging.debug("Silence audio added for blank '{}' for '{}' seconds".format(
+                interview_data[item]['Meta'].get("name"),
+                ((interview_data[item]['Meta'].get('endTime')) - (interview_data[item]['Meta'].get('startTime')))
+            )
+            )
 
         # Might not be needed if we append the audio when we find the full clip in the parent class
         elif interview_data[item]['Meta'].get('clipType') == 'Interview':
@@ -134,6 +139,11 @@ def interview_audio_builder(interview_data, user):
                 interview_data[item]['Meta'].get('endTime')
             )
             sound_builder.append(audio)
+            logging.debug("Audio added for clip '{}' for '{}' seconds".format(
+                interview_data[item]['Meta'].get("name"),
+                ((interview_data[item]['Meta'].get('endTime')) - (interview_data[item]['Meta'].get('startTime')))
+            )
+            )
 
     return sound_builder
 
@@ -173,7 +183,7 @@ def better_generate_text_caption(clip, edit_data):
 
     except Exception as e:
         print("Exception occured in text caption generation: {}".format(e))
-        #print(e)
+        logging.debug("Exception occured in text caption generation: {}".format(e))
         return clip
         
 
