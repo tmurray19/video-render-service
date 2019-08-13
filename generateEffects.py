@@ -2,11 +2,7 @@ import moviepy.editor as myp
 import sherpaUtils
 import os
 from config import Config
-
-DIR_LOCATION = 'G:/project'
-RESOURCE_PATH = 'resource'
-SILENCE = 'silence.mp3'
-
+import logging
 
 silence_path = os.path.join(Config.DIR_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
 attach_dir = Config.DIR_LOCATION

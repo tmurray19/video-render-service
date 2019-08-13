@@ -25,7 +25,7 @@ def render_video(user, compress_render=False):
 
     log_file_name = os.path.join(
         Config.LOGS_LOCATION,
-        Config.RENDER_LOG, 
+        Config.RENDER_LOGS, 
         datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_instance.log"
     )
 
@@ -232,7 +232,6 @@ def render_video(user, compress_render=False):
                     interview_clip_ord+=1
 
                     next_clip_data = sherpaUtils.give_clip_order(interview_clip_ord, json_file['InterviewFootage'])
-                    print(next_clip_data)
 
                     # Clip should be the the same size as the time to fill if possible
                     # But it's also possible that the next clip isn't bi enough either
@@ -281,7 +280,7 @@ def render_video(user, compress_render=False):
         video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
     # Printout at end
-    logging.debug("Video list")
+    logging.debug("Video list:")
     logging.debug(video_list)
 
     # Create audio from the interview Footage
@@ -289,44 +288,39 @@ def render_video(user, compress_render=False):
 
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)
-
-
-    music = generateEffects.open_music_clip(user)
-    try:
-        bottom_audio = concatenate_audioclips(bottom_audio)
-
-        finished_audio = CompositeAudioClip([top_audio, bottom_audio])
-    except Exception as e:
-        logging.debug("Exception occured in render")
-        logging.debug(e)
-        finished_audio = top_audio
-    
-    try:
+        
+    try:    
+        music = generateEffects.open_music_clip(user)
         finished_audio = CompositeAudioClip([top_audio, music])
     except Exception as e:
         logging.debug("Exception occured in render:")
         logging.debug(e)
         finished_audio = top_audio
 
+    try:
+        bottom_audio = concatenate_audioclips(bottom_audio)
+        finished_audio = CompositeAudioClip([top_audio, bottom_audio])
+    except Exception as e:
+        logging.debug("Exception occured in render")
+        logging.debug(e)
+        finished_audio = top_audio
+
+
     # Concatenate the video files together
     finished_video = concatenate_videoclips(video_list)
     finished_video = finished_video.set_audio(finished_audio)
 
-    # Returns html render of video if true
-    """    
-    if html_render is True:
-        low_quality = finished_video.resize(0.5)
-        return html_tools.html_embed(low_quality, rd_kwargs={'fps': 15, 'bitrate': '300k'})
-    """
-    # Otherwise full renders
-    #else:
+
+    vid_name = user + "com_edited.mp4" if compress_render else user + "_edited.mp4"
+
+
     logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
     # Render the finished project out into an mp4
     finished_video.write_videofile(
         os.path.join(
             attach_dir,
             user,
-            user + "_edited.mp4"
+            vid_name
         )
     )
 
@@ -336,5 +330,3 @@ def render_video(user, compress_render=False):
     finished_video.close
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
-
-render_video("test")
