@@ -314,7 +314,7 @@ def render_video(user, compress_render=False):
     finished_video = finished_video.set_audio(finished_audio)
 
 
-    vid_name = user + "_com_edited.mp4" if compress_render else user + "_edited.mp4"
+    vid_name = user + "_com_10sec_edited.mp4" if compress_render else user + "_edited.mp4"
 
 
     logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
@@ -328,7 +328,7 @@ def render_video(user, compress_render=False):
                 ), 
                 threads=8,
                 preset="ultrafast",
-                #bitrate="350k",
+                bitrate="150k",
 
         )
     else:
