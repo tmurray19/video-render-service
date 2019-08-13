@@ -1,5 +1,4 @@
 import os
-import azureFileTransfer
 import json
 from config import Config
 import logging
