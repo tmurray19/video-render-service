@@ -249,7 +249,7 @@ def render_video(user, compress_render=False):
                     if next_clip_data['Meta'].get('clipType') == "Interview":
                         next_clip = generateEffects.generate_clip(
                             clip_data=next_clip_data['Meta'],
-                            end=end_time,
+                            end=next_clip_data['Meta'].get('startTime')+end_time,
                             user=user,
                             compressed=compress_render
                         )
