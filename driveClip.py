@@ -243,6 +243,8 @@ def render_video(user, compress_render=False):
                         sherpaUtils.calculate_clip_length(next_clip_data['Meta'])
                     )
 
+                    logging.debug("End time for clip is {}".format(end_time))
+
 
                     if next_clip_data['Meta'].get('clipType') == "Interview":
                         next_clip = generateEffects.generate_clip(
