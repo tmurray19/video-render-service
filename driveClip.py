@@ -1,5 +1,4 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
-from moviepy.video.io import html_tools
 from config import Config
 from datetime import datetime
 import generateEffects, sherpaUtils, os, time, logging
@@ -7,7 +6,7 @@ import generateEffects, sherpaUtils, os, time, logging
 
 # TODO: This needs to be changed in the app.config to
 #  read to the correct attach directory as outlined in the configuration
-attach_dir = os.path.abspath(Config.DIR_LOCATION)
+attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 
 def correct_timeline():
@@ -24,6 +23,7 @@ def render_video(user, compress_render=False):
     """
 
     log_file_name = os.path.join(
+        Config.BASE_DIR,
         Config.LOGS_LOCATION,
         Config.RENDER_LOGS, 
         datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_service_instance.log"
@@ -265,6 +265,7 @@ def render_video(user, compress_render=False):
                     print("Total insert length {}".format(total_insert_length))
 
                     clip = concatenate_videoclips([clip, next_clip])
+                logging.debug("Blank clip '{}' has been replaced with interview clips as necessary".format(clip_name))
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
@@ -276,8 +277,8 @@ def render_video(user, compress_render=False):
 
 
         # Insert clip into correct position in array
-        logging.debug("Inserted {} into pos {}.".format(clip_data['Meta'].get('name'), clip_data['Meta'].get('order')-1))
-        print("Inserted {} into pos {}.".format(clip_data['Meta'].get('name'), clip_data['Meta'].get('order')-1))
+        logging.debug("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
+        print("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
 
         cutaway_timeline += clip.duration
         video_list.insert(clip_data['Meta'].get('order')-1, clip)
@@ -315,34 +316,30 @@ def render_video(user, compress_render=False):
 
 
     vid_name = user + "_com_10sec_edited.mp4" if compress_render else user + "_edited.mp4"
+    vid_dir = os.path.join(attach_dir, user, vid_name)
 
 
     logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
+    logging.debug("Writing '{}' to {}".format(vid_name, vid_dir))
     # Render the finished project out into an mp4
     if compress_render:
         finished_video.write_videofile(
-            os.path.join(
-                attach_dir,
-                user,
-                vid_name
-                ), 
-                threads=8,
-                preset="ultrafast",
-                bitrate="3000k",
-
+            vid_dir,
+            threads=8,
+            preset="ultrafast",
+            bitrate="2500k",
+            audio_codec="aac",
+            remove_temp=True,
         )
+
     else:
-        finished_video.write_videofile(
-            os.path.join(
-                attach_dir,
-                user,
-                vid_name
-            )
+        finished_video.write_videofile(            
+            vid_dir,
+            threads=8,
+            audio_codec="aac",
+            remove_temp=True,
         )
 
-    top_audio.close
-    bottom_audio.close
-    finished_audio.close
-    finished_video.close
+    logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
