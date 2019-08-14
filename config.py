@@ -5,8 +5,10 @@ import os
 # Config file
 class Config(object):
     # TODO: Change this location to the azure file share mount location
-    DIR_LOCATION = os.environ.get('DIR_LOCATION') or "/mnt/csae48d5df47deax41bcxbaa/videos"
-    LOGS_LOCATION = os.environ.get('LOGS_LOCATION') or "/mnt/csae48d5df47deax41bcxbaa/logs" 
+    BASE_DIR = os.environ.get('BASE_DIR') or "/mnt/csae48d5df47deax41bcxbaa"
+    VIDS_LOCATION = os.environ.get('VIDS_LOCATION') or "videos"
+    QUEUE_LOCATION = os.environ.get('QUEUE_LOCATION') or 'renderQueue'
+    LOGS_LOCATION = os.environ.get('LOGS_LOCATION') or "logs" 
     WATCHER_LOGS = os.environ.get('WATCHER_LOG') or 'renderWatcher'
     RENDER_LOGS = os.environ.get('RENDER_LOG') or 'renderService'
     FLASK_LOGS = os.environ.get('FLASK_LOG') or 'renderFlask'
@@ -23,4 +25,3 @@ class Config(object):
     RESOURCE_PATH = os.environ.get('RESOURCE_PATH') or 'resource'
     # Name of silence mp3
     SILENCE = os.environ.get('SILENCE') or 'silence.mp3'
-    QUEUE_FOLDER = os.environ.get('QUEUE_FOLDER') or 'renderQueue'

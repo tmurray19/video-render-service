@@ -4,8 +4,8 @@ import os
 from config import Config
 import logging
 
-silence_path = os.path.join(Config.DIR_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
-attach_dir = Config.DIR_LOCATION
+silence_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
+attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 positions = {
     1: ("left", "top"),  # Top Left

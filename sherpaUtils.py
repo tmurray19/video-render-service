@@ -4,7 +4,7 @@ from config import Config
 import logging
 
 # Defining the location of the Azure File Share and the name of the json file to look for in a given project
-attach_dir = Config.DIR_LOCATION
+attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 proj = Config.PROJECT_NAME
 
 """
