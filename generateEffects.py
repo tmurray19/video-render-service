@@ -48,7 +48,6 @@ music_list = {
     16: "To_the_Top.mp3",
     17: "Touching_Moment.mp3",
     18: "Water_Lily.mp3",
-    
 }
 
 # Generate a blank image
