@@ -10,7 +10,7 @@ from datetime import datetime
 import logging
 
 class Watcher:
-    DIRECTORY_TO_WATCH = os.path.join(Config.DIR_LOCATION, Config.QUEUE_FOLDER)
+    DIRECTORY_TO_WATCH = os.path.join(Config.BASE_DIR, Config.QUEUE_LOCATION)
 
     def __init__(self):
         self.observer = Observer()
@@ -53,7 +53,7 @@ class Handler(FileSystemEventHandler):
             print("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
             logging.debug("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
             print("Source path: {}".format(event.src_path))
-            logging.debug("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
+            logging.debug("Source path: {}".format(event.src_path))
 
             # Open the file for reading
             json_file = open(event.src_path, 'r')
@@ -96,6 +96,7 @@ class Handler(FileSystemEventHandler):
 if __name__ == '__main__':
 
     log_file_name = os.path.join(
+        Config.BASE_DIR,
         Config.LOGS_LOCATION,
         Config.WATCHER_LOGS, 
         datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_watcher_instance.log"
