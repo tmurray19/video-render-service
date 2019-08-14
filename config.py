@@ -4,8 +4,8 @@ import os
 
 # Config file
 class Config(object):
-    # TODO: Change this location to the azure file share mount location
     BASE_DIR = os.environ.get('BASE_DIR') or "/mnt/csae48d5df47deax41bcxbaa"
+    #BASE_DIR = os.environ.get('BASE_DIR') or "N:/project"
     VIDS_LOCATION = os.environ.get('VIDS_LOCATION') or "videos"
     QUEUE_LOCATION = os.environ.get('QUEUE_LOCATION') or 'renderQueue'
     LOGS_LOCATION = os.environ.get('LOGS_LOCATION') or "logs" 
@@ -21,7 +21,5 @@ class Config(object):
     SHARE_NAME = os.environ.get('SHARE_NAME') or 'cs-william-squarev-media-10037ffe909d3982' #'testingazure'  # 
     # Defining name of json file containing edits
     PROJECT_NAME = os.environ.get('PROJECT_NAME') or 'FinalSubclipJson.json'
-    # TODO: The location of the resources (the silence mp3, default templates, etc.) may change
-    # Defining location of generic 'resources' location
 
 
