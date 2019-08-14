@@ -1,10 +1,11 @@
 import moviepy.editor as myp
+from moviepy.audio.fx.volumex import volumex
 import sherpaUtils
 import os
 from config import Config
 import logging
 
-silence_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
+resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 positions = {
@@ -27,6 +28,28 @@ sizes = {
     "xx-large": 400
 }
 
+music_list = {
+    0: "silence.mp3", # No music
+    1: "Ambient_corporate.mp3",
+    2: "Autumn_Inspiration.mp3",
+    3: "Beneath_the_Moonlight.mp3",
+    4: "C_Major_Prelude.mp3",
+    5: "Entire.mp3",
+    6: "Family_Montage.mp3",
+    7: "Komiku.mp3",
+    8: "Lobo.mp3",
+    9: "Motivational_Beauty.mp3",
+    10: "Old_Vienna.mp3",
+    11: "Positive_Hip_Hop.mp3",
+    12: "Rocco.mp3",
+    13: "Scott_Holmes.mp3",
+    14: "Soaring_High.mp3",
+    15: "Steve_Combs.mp3",
+    16: "To_the_Top.mp3",
+    17: "Touching_Moment.mp3",
+    18: "Water_Lily.mp3",
+    
+}
 
 # Generate a blank image
 # Add text right now just for clarity sake
@@ -49,7 +72,7 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
         duration=dur
     )
 
-    audio = myp.AudioFileClip(silence_path)
+    audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
 
@@ -82,7 +105,7 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
 
     if clip.audio is None:
         logging.error("No clip audio found for clip {}".format(clip_data.get('name')))
-        audio = myp.AudioFileClip(silence_path)
+        audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
         clip = clip.set_audio(audio.set_duration(end - start))
     return clip
 
@@ -97,7 +120,7 @@ def generate_image_clip(clip_data, user):
         duration=clip_data.get('duration')
     )
 
-    audio = myp.AudioFileClip(silence_path)
+    audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     image_clip = image_clip.set_audio(audio.set_duration(clip_data.get('duration')))
 
@@ -115,11 +138,17 @@ def interview_audio_builder(interview_data, user):
         # If it's a blank, add silence for the length of the clip ( May not be necessary? )
         if interview_data[item]['Meta'].get('clipType') == "Blank":
             sound_builder.append(
-                myp.AudioFileClip(silence_path).set_duration(
-                    (interview_data[item]['Meta'].get('endTime')) -
-                    (interview_data[item]['Meta'].get('startTime'))
+                myp.AudioFileClip(
+                    os.path.join(
+                        resource_path, 
+                        music_list[0]
+                    )
+                ).set_duration(
+                    (interview_data[item]['Meta'].get('endTime')) - (interview_data[item]['Meta'].get('startTime'))
+                    ).volumex(
+                        interview_data[item]['Meta'].get('audioLevel')
+                    )
                 )
-            )
             logging.debug("Silence audio added for blank '{}' for '{}' seconds".format(
                 interview_data[item]['Meta'].get("name"),
                 ((interview_data[item]['Meta'].get('endTime')) - (interview_data[item]['Meta'].get('startTime')))
@@ -138,6 +167,7 @@ def interview_audio_builder(interview_data, user):
                 interview_data[item]['Meta'].get('startTime'),
                 interview_data[item]['Meta'].get('endTime')
             )
+            audio = audio.volumex(interview_data[item]['Meta'].get('audioLevel'))
             sound_builder.append(audio)
             logging.debug("Audio added for clip '{}' for '{}' seconds".format(
                 interview_data[item]['Meta'].get("name"),
@@ -188,12 +218,21 @@ def better_generate_text_caption(clip, edit_data):
         
 
 
-def open_music_clip(music_choice):
+def open_music(music_data, dur):
     """
     music_choice: string --> Which music file to open
+    dur: int --> The duration of the video
 
     For opening the music clip
     """
-    #music = myp.AudioFileClip(music_choice)
+    try:
+        music = myp.AudioFileClip(os.path.join(resource_path, music_list[music_data.get("choice")]))
+        music = music.fx(volumex, music_data.get("audioLevel"))
+        music = music.set_duration(dur)
 
-    return 0
+        logging.debug("Music file '{}' chosen for video, cropped to {}s in length".format(music_list[music_data.get("choice")], dur))
+        return music
+    
+    except Exception as e:
+        logging.error("Exception occured during open_music: {}".format(e))
+        return 0

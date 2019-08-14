@@ -9,12 +9,6 @@ import generateEffects, sherpaUtils, os, time, logging
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 
-def correct_timeline():
-    """Function for adding necessary blanks to the cutaway timeline"""
-    pass
-
-
-
 def render_video(user, compress_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
@@ -293,8 +287,9 @@ def render_video(user, compress_render=False):
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)
         
-    try:    
-        music = generateEffects.open_music_clip(user)
+    try:
+        music_data = json_file['Music']
+        music = generateEffects.open_music(music_data, cutaway_timeline)
         finished_audio = CompositeAudioClip([top_audio, music])
     except Exception as e:
         logging.debug("Exception occured in render - during music audio building:")
