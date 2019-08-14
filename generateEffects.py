@@ -29,7 +29,7 @@ sizes = {
 }
 
 music_list = {
-    0: "silence.mp3", # No music
+    0: "silence.mp3", # Mutes audio
     1: "Ambient_corporate.mp3",
     2: "Autumn_Inspiration.mp3",
     3: "Beneath_the_Moonlight.mp3",
@@ -229,6 +229,10 @@ def open_music(music_data, dur):
         music = myp.AudioFileClip(os.path.join(resource_path, music_list[music_data.get("choice")]))
         music = music.fx(volumex, music_data.get("audioLevel"))
         music = music.set_duration(dur)
+
+        # TODO: 2 second fade in and out automatically added
+        music = music.audio_fadein(2)
+        music = music.audio_fadeout(2)
 
         logging.debug("Music file '{}' chosen for video, cropped to {}s in length".format(music_list[music_data.get("choice")], dur))
         return music
