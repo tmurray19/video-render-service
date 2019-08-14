@@ -290,7 +290,7 @@ def render_video(user, compress_render=False):
     try:
         music_data = json_file['Music']
         music = generateEffects.open_music(music_data, cutaway_timeline)
-        finished_audio = CompositeAudioClip([top_audio, music])
+        top_audio = CompositeAudioClip([top_audio, music])
     except Exception as e:
         logging.debug("Exception occured in render - during music audio building:")
         logging.debug(e)
