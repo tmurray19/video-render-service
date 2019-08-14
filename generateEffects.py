@@ -5,7 +5,7 @@ import os
 from config import Config
 import logging
 
-resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH, Config.SILENCE)
+resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH)
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 positions = {
@@ -232,7 +232,7 @@ def open_music(music_data, dur):
 
         logging.debug("Music file '{}' chosen for video, cropped to {}s in length".format(music_list[music_data.get("choice")], dur))
         return music
-    
+
     except Exception as e:
         logging.error("Exception occured during open_music: {}".format(e))
         return 0

@@ -9,6 +9,7 @@ class Config(object):
     VIDS_LOCATION = os.environ.get('VIDS_LOCATION') or "videos"
     QUEUE_LOCATION = os.environ.get('QUEUE_LOCATION') or 'renderQueue'
     LOGS_LOCATION = os.environ.get('LOGS_LOCATION') or "logs" 
+    RESOURCE_PATH = os.environ.get('RESOURCE_PATH') or 'resource'
     WATCHER_LOGS = os.environ.get('WATCHER_LOG') or 'renderWatcher'
     RENDER_LOGS = os.environ.get('RENDER_LOG') or 'renderService'
     FLASK_LOGS = os.environ.get('FLASK_LOG') or 'renderFlask'
@@ -22,6 +23,5 @@ class Config(object):
     PROJECT_NAME = os.environ.get('PROJECT_NAME') or 'FinalSubclipJson.json'
     # TODO: The location of the resources (the silence mp3, default templates, etc.) may change
     # Defining location of generic 'resources' location
-    RESOURCE_PATH = os.environ.get('RESOURCE_PATH') or 'resource'
-    # Name of silence mp3
-    SILENCE = os.environ.get('SILENCE') or 'silence.mp3'
+
+
