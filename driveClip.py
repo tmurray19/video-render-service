@@ -1,4 +1,4 @@
-from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
+from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
 from config import Config
 from datetime import datetime
 import generateEffects, sherpaUtils, os, time, logging
@@ -12,8 +12,7 @@ attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 def render_video(user, compress_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
-    json_data: String -> The path to the JSON data 
-    html_render: Bool -> Set to true if you want this function to return html code of the render
+    compress_render: Bool -> Set to true if you want this function to return a quick render
     """
 
     log_file_name = os.path.join(
@@ -281,6 +280,14 @@ def render_video(user, compress_render=False):
     logging.debug("Video list:")
     logging.debug(video_list)
 
+    # We need to insert the intro if it exists
+    if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
+        intro_clip = VideoFileClip(os.path.join(attach_dir, user, "intro.mp4"))
+        intro_clip.set_audio(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
+        video_list.insert(0, intro_clip)
+        top_audio.insert(0, intro_clip.audio)
+
+
     # Create audio from the interview Footage
     bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
 
@@ -290,6 +297,8 @@ def render_video(user, compress_render=False):
     try:
         music_data = json_file['Music']
         music = generateEffects.open_music(music_data, cutaway_timeline)
+        if music.duration > cutaway_timeline:
+            music = CompositeAudioClip([music, generateEffects.open_music(music_data, cutaway_timeline - music.duration)])
         top_audio = CompositeAudioClip([top_audio, music])
     except Exception as e:
         logging.debug("Exception occured in render - during music audio building:")
@@ -322,7 +331,7 @@ def render_video(user, compress_render=False):
             vid_dir,
             threads=8,
             preset="ultrafast",
-            bitrate="2500k",
+            bitrate="1500k",
             audio_codec="aac",
             remove_temp=True,
         )
@@ -332,6 +341,7 @@ def render_video(user, compress_render=False):
             vid_dir,
             threads=8,
             audio_codec="aac",
+            bitrate="3000k",
             remove_temp=True,
         )
 
