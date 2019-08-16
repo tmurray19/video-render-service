@@ -9,7 +9,7 @@ import generateEffects, sherpaUtils, os, time, logging
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 
-def render_video(user, compress_render=False):
+def render_video(user, compress_render=True):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
     compress_render: Bool -> Set to true if you want this function to return a quick render
