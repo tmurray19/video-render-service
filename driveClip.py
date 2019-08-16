@@ -319,7 +319,7 @@ def render_video(user, compress_render=False):
     finished_video = finished_video.set_audio(finished_audio)
 
 
-    vid_name = user + "_com_10sec_edited.mp4" if compress_render else user + "_edited.mp4"
+    vid_name = user + "_com_500k_edited.mp4" if compress_render else user + "_edited.mp4"
     vid_dir = os.path.join(attach_dir, user, vid_name)
 
 
@@ -329,9 +329,9 @@ def render_video(user, compress_render=False):
     if compress_render:
         finished_video.write_videofile(
             vid_dir,
-            threads=8,
+            threads=4,
             preset="ultrafast",
-            bitrate="1500k",
+            bitrate="500k",
             audio_codec="aac",
             remove_temp=True,
         )
@@ -339,12 +339,17 @@ def render_video(user, compress_render=False):
     else:
         finished_video.write_videofile(            
             vid_dir,
-            threads=8,
+            threads=4,
             audio_codec="aac",
             bitrate="3000k",
             remove_temp=True,
         )
 
+    finished_audio.close
+    finished_video.close
+
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
+
+render_video("1149")
