@@ -319,7 +319,7 @@ def render_video(user, compress_render=True):
     finished_video = finished_video.set_audio(finished_audio)
 
 
-    vid_name = user + "_com_500k_edited.mp4" if compress_render else user + "_edited.mp4"
+    vid_name = user + "_com_1000k_edited.mp4" if compress_render else user + "_edited.mp4"
     vid_dir = os.path.join(attach_dir, user, vid_name)
 
 
@@ -331,7 +331,7 @@ def render_video(user, compress_render=True):
             vid_dir,
             threads=4,
             preset="ultrafast",
-            bitrate="500k",
+            bitrate="1000k",
             audio_codec="aac",
             remove_temp=True,
         )
