@@ -1,7 +1,7 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
 from config import Config
 from datetime import datetime
-import generateEffects, sherpaUtils, os, time, logging
+import generateEffects, sherpaUtils, os, time, logging, gc
 
 
 # TODO: This needs to be changed in the app.config to
@@ -14,6 +14,8 @@ def render_video(user, compress_render=False):
     User: String -> The ID of the project (User is just a hangover from previous builds)
     compress_render: Bool -> Set to true if you want this function to return a quick render
     """
+
+    gc.collect()
 
     log_file_name = os.path.join(
         Config.BASE_DIR,
