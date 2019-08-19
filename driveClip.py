@@ -358,12 +358,12 @@ def render_video(user, compress_render=False):
         append_to_last_clip = True
 
         # Getting segment numbers, and determining if a hangover segment is necessary
-        segment_no = floor(finished_dur/chunk_len) - 1
+        segment_no = floor(finished_dur/chunk_len)
         hangover_segment = finished_dur - finished_dur/chunk_len
         if hangover_segment > chunk_len / 2:
             append_to_last_clip = False
 
-        logging.debug("Video duration: {}s  /{}s = {} segments)      full segments: {}".format(finished_dur, chunk_len, finished_dur/chunk_len, segment_no))
+        logging.debug("Video duration: {}s  /{}s = {} segments      full segments: {}".format(finished_dur, chunk_len, finished_dur/chunk_len, segment_no))
 
         # _ is for non important variable
         for i in range(segment_no):
@@ -372,7 +372,7 @@ def render_video(user, compress_render=False):
             preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_dur))
             logging.debug("i is {}, segment_no is {}, append_to_last_clip is {}".format(i, segment_no, append_to_last_clip))
             logging.debug("i == segment_no: {}, i is segment_no: {}".format(i==segment_no, i is segment_no))
-            if i == segment_no and append_to_last_clip:
+            if i == segment_no-1 and append_to_last_clip:
                 logging.debug("Now clip should be from {} to {}".format(playtime, playtime+chunk_len+hangover_segment))
                 preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
             playtime+=chunk_len
