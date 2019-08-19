@@ -370,6 +370,8 @@ def render_video(user, compress_render=False):
             logging.debug("Start: {}      End: {}".format(playtime, playtime+chunk_len))
             logging.debug("Min of playtime, and finished video duration: {}".format(min(playtime+chunk_len, finished_dur)))
             preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_dur))
+            logging.debug("i is {}, segment_no is {}, append_to_last_clip is {}".format(i, segment_no, append_to_last_clip))
+            logging.debug("i == segment_no: {}, i is segment_no: {}".format(i==segment_no, i is segment_no))
             if i == segment_no and append_to_last_clip:
                 logging.debug("Now clip should be from {} to {}".format(playtime, playtime+chunk_len+hangover_segment))
                 preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
