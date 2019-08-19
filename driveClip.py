@@ -367,7 +367,7 @@ def render_video(user, compress_render=False):
 
         # _ is for non important variable
         for i in range(segment_no):
-            preview_clip = finished_video.subclip(playtime, playtime+chunk_len)
+            preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_video.duration))
             if i == segment_no and append_to_last_clip:
                 # do nothing rn
                 preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
