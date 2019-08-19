@@ -387,7 +387,7 @@ def render_video(user, compress_render=False):
             vid_dir = os.path.join(attach_dir, user, vid_name)
 
             logging.debug("Rendering {}".format(vid_name))
-            finished_video.write_videofile(
+            video.write_videofile(
                 vid_dir,
                 threads=8,
                 preset="ultrafast",
