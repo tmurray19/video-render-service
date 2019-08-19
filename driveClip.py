@@ -137,8 +137,10 @@ def render_video(user, compress_render=False):
 
         # If it's a blank
         elif clip_type == "Blank":
+            # These values are used later in the blank process
             some_filler = False
             total_insert_length = 0
+            # We need to see if we can find any clips to replace the blank with
             try:
                 print(clip_name + " is a blank.")
                 logging.debug(clip_name + " is a blank.")
@@ -155,7 +157,7 @@ def render_video(user, compress_render=False):
 
                 interview_clip_ord = interview_clip_meta_data.get('order')
 
-                # Difference between the main timeline and the starting time line
+                # Difference between the current time in the video, and the start time of the interview clip
                 dif = cutaway_timeline-interview_start_time
 
                 
@@ -190,6 +192,7 @@ def render_video(user, compress_render=False):
 
                 interview_clip_type = interview_clip_meta_data.get('clipType')
 
+                # Create video clip from data found above
                 if interview_clip_type == "Interview":
                     logging.debug("Replacing blank {} with interview clip {}".format(
                         clip_data['Meta'].get('name'),
@@ -206,6 +209,7 @@ def render_video(user, compress_render=False):
 
                     clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
+                # Blanks from the cutaway can be placed instead
                 elif interview_clip_type == "Blank":
                     
                     logging.debug("Replacing blank {} with interview clip {}".format(
@@ -218,6 +222,7 @@ def render_video(user, compress_render=False):
                 # TODO: Careful here, rounding could cause issues
                 total_insert_length = round(total_insert_length, 3)
 
+                # If the blank length is longer than the length of the videos being inserted
                 while total_insert_length != cutaway_blank_len:
                     some_filler = True
                     logging.debug("Clip length didn't suffice for blank, adding more files as necessary")
@@ -266,8 +271,13 @@ def render_video(user, compress_render=False):
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
+                if some_filler:
+                    logging.debug("Some suitable clips have been found from the interview clip, but a discrepency has still occured")
+                    logging.debug("{}s of footage failed to be found in the interview footage".format(time_to_fill))
+                    logging.debug("Inserting interview clips that have been found.")
                 if some_filler == False:
-                    logging.debug("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
+                    logging.error("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
+                    logging.debug("Rendering out blank file found in cutaway timeline instead")
                     clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
                     clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
@@ -299,9 +309,11 @@ def render_video(user, compress_render=False):
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)
         
+    # Try adding the music if it exists
     try:
         music_data = json_file['Music']
         music = generateEffects.open_music(music_data, cutaway_timeline)
+        # If the video is longer than the music, replay it
         if music.duration > cutaway_timeline:
             music = CompositeAudioClip([music, generateEffects.open_music(music_data, cutaway_timeline - music.duration)])
         top_audio = CompositeAudioClip([top_audio, music])
@@ -310,6 +322,7 @@ def render_video(user, compress_render=False):
         logging.debug(e)
         finished_audio = top_audio
 
+    # Try concatenating the top and bottom audio lines together
     try:
         bottom_audio = concatenate_audioclips(bottom_audio)
         finished_audio = CompositeAudioClip([top_audio, bottom_audio])
@@ -324,7 +337,8 @@ def render_video(user, compress_render=False):
     finished_video = finished_video.set_audio(finished_audio)
 
 
-    vid_name = user + "_com_10sec_edited.mp4" if compress_render else user + "_edited.mp4"
+    # Defining path here is cleaner
+    vid_name = user + "_com_preview_edited.mp4" if compress_render else user + "_edited.mp4"
     vid_dir = os.path.join(attach_dir, user, vid_name)
 
 
@@ -346,7 +360,7 @@ def render_video(user, compress_render=False):
             vid_dir,
             threads=8,
             audio_codec="aac",
-            bitrate="6000k",
+            bitrate="8000k",
             remove_temp=True,
         )
 
