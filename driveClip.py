@@ -363,6 +363,7 @@ def render_video(user, compress_render=False):
         if hangover_segment > chunk_len / 2:
             append_to_last_clip = False
 
+        logging.debug("Hnagover Segment: {}, append to last clip: {}".format(hangover_segment, append_to_last_clip))
         logging.debug("Video duration: {}s  /{}s = {} segments      full segments: {}".format(finished_dur, chunk_len, finished_dur/chunk_len, segment_no))
 
         # _ is for non important variable
@@ -371,7 +372,6 @@ def render_video(user, compress_render=False):
             logging.debug("Min of playtime, and finished video duration: {}".format(min(playtime+chunk_len, finished_dur)))
             preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_dur))
             logging.debug("i is {}, segment_no is {}, append_to_last_clip is {}".format(i, segment_no-1, append_to_last_clip))
-            logging.debug("i == segment_no: {}, i is segment_no: {}".format(i==segment_no-1, i is segment_no-1))
             if i == segment_no-1 and append_to_last_clip:
                 logging.debug("Now clip should be from {} to {}".format(playtime, playtime+chunk_len+hangover_segment))
                 preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
