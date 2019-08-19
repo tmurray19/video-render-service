@@ -383,8 +383,7 @@ def render_video(user, compress_render=False):
         logging.debug("Rendering out {} videos in {}s chunks".format(len(preview_chunks), chunk_len))
 
         for video in preview_chunks:
-            count = 1
-            vid_name = user + "_com_chunk_" + count + "_edited.mp4"
+            vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
             vid_dir = os.path.join(attach_dir, user, vid_name)
 
             logging.debug("Rendering {}".format(vid_name))
@@ -396,7 +395,6 @@ def render_video(user, compress_render=False):
                 audio_codec="aac",
                 remove_temp=True,
             )
-            count+=1
 
     else:
         logging.debug("Rendering {}".format(vid_name))
