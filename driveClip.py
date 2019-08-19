@@ -1,7 +1,7 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
 from config import Config
 from datetime import datetime
-from math import roof
+from math import ceil
 import generateEffects, sherpaUtils, os, time, logging, gc
 
 
@@ -358,7 +358,7 @@ def render_video(user, compress_render=False):
         append_to_last_clip = True
 
         # Getting segment numbers, and determining if a hangover segment is necessary
-        segment_no = roof(finished_dur/chunk_len)
+        segment_no = ceil(finished_dur/chunk_len)
         hangover_segment = finished_dur - finished_dur/chunk_len
         if hangover_segment > chunk_len / 2:
             append_to_last_clip = False
