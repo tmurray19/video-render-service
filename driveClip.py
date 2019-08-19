@@ -137,6 +137,7 @@ def render_video(user, compress_render=False):
 
         # If it's a blank
         elif clip_type == "Blank":
+            some_filler = False
             total_insert_length = 0
             try:
                 print(clip_name + " is a blank.")
@@ -218,6 +219,7 @@ def render_video(user, compress_render=False):
                 total_insert_length = round(total_insert_length, 3)
 
                 while total_insert_length != cutaway_blank_len:
+                    some_filler = True
                     logging.debug("Clip length didn't suffice for blank, adding more files as necessary")
                     print("Clip length didn't suffice for blank, adding more files as necessary")
 
@@ -264,11 +266,12 @@ def render_video(user, compress_render=False):
 
             # No clip can be found, generate the clip from the blank data in the cutaway timeline
             except TypeError:
-                logging.debug("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
-                clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
+                if some_filler == False:
+                    logging.debug("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
+                    clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
+                    clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
 
-                top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
+                    top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
 
         # Insert clip into correct position in array
@@ -333,7 +336,7 @@ def render_video(user, compress_render=False):
             vid_dir,
             threads=8,
             preset="ultrafast",
-            bitrate="1500k",
+            bitrate="1000k",
             audio_codec="aac",
             remove_temp=True,
         )
@@ -343,10 +346,11 @@ def render_video(user, compress_render=False):
             vid_dir,
             threads=8,
             audio_codec="aac",
-            bitrate="3000k",
+            bitrate="6000k",
             remove_temp=True,
         )
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
+
