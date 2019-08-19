@@ -358,7 +358,7 @@ def render_video(user, compress_render=False):
         append_to_last_clip = True
 
         # Getting segment numbers, and determining if a hangover segment is necessary
-        segment_no = floor(finished_dur/chunk_len)
+        segment_no = floor(finished_dur/chunk_len) - 1
         hangover_segment = finished_dur - finished_dur/chunk_len
         if hangover_segment > chunk_len / 2:
             append_to_last_clip = False
