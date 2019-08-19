@@ -1,6 +1,7 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
 from config import Config
 from datetime import datetime
+from math import floor
 import generateEffects, sherpaUtils, os, time, logging, gc
 
 
@@ -346,16 +347,59 @@ def render_video(user, compress_render=False):
     logging.debug("Writing '{}' to {}".format(vid_name, vid_dir))
     # Render the finished project out into an mp4
     if compress_render:
-        finished_video.write_videofile(
-            vid_dir,
-            threads=8,
-            preset="ultrafast",
-            bitrate="1000k",
-            audio_codec="aac",
-            remove_temp=True,
-        )
+        # Get 10 second chunks of videos
+        logging.debug("Splitting video up into 10s chunks.")
+        
+        # Initialising variables
+        finished_dur = finished_video.duration
+        chunk_len = 10
+        preview_chunks = []
+        playtime = 0
+        append_to_last_clip = True
+
+        # Getting segment numbers, and determining if a hangover segment is necessary
+        segment_no = floor(finished_dur/chunk_len)
+        hangover_segment = finished_dur - finished_dur/chunk_len
+        if hangover_segment > chunk_len / 2:
+            append_to_last_clip = False
+
+        print(finished_dur)
+        print(finished_dur/chunk_len)
+        logging.debug("Video duration: {}s  /{}s = {} segments)      full segments: {}".format(finished_dur, chunk_len, finished_dur/chunk_len, segment_no))
+
+        # _ is for non important variable
+        for i in range(segment_no):
+            preview_clip = finished_video.subclip(playtime, playtime+chunk_len)
+            if i == segment_no and append_to_last_clip:
+                # do nothing rn
+                preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
+            playtime+=chunk_len
+            logging.debug("Segment {} is {}s long".format(i, preview_clip.duration))
+            preview_chunks.append(preview_clip)
+
+
+        
+        logging.debug("Preview chunk list: ")
+        logging.debug(preview_chunks)
+
+        logging.debug("Rendering out {} videos in {}s chunks".format(len(preview_chunks), chunk_len))
+
+        for video in preview_chunks:
+            vid_name = user + "_com_chunk_" + preview_chunks.index(video) + "_edited.mp4"
+            vid_dir = os.path.join(attach_dir, user, vid_name)
+
+            logging.debug("Rendering {}".format(vid_name))
+            finished_video.write_videofile(
+                vid_dir,
+                threads=8,
+                preset="ultrafast",
+                bitrate="1000k",
+                audio_codec="aac",
+                remove_temp=True,
+            )
 
     else:
+        logging.debug("Rendering {}".format(vid_name))
         finished_video.write_videofile(            
             vid_dir,
             threads=8,
