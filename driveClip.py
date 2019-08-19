@@ -1,7 +1,7 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
 from config import Config
 from datetime import datetime
-from math import floor
+from math import roof
 import generateEffects, sherpaUtils, os, time, logging, gc
 
 
@@ -358,7 +358,7 @@ def render_video(user, compress_render=False):
         append_to_last_clip = True
 
         # Getting segment numbers, and determining if a hangover segment is necessary
-        segment_no = floor(finished_dur/chunk_len)
+        segment_no = roof(finished_dur/chunk_len)
         hangover_segment = finished_dur - finished_dur/chunk_len
         if hangover_segment > chunk_len / 2:
             append_to_last_clip = False
@@ -370,8 +370,8 @@ def render_video(user, compress_render=False):
             logging.debug("Start: {}      End: {}".format(playtime, playtime+chunk_len))
             logging.debug("Min of playtime, and finished video duration: {}".format(min(playtime+chunk_len, finished_dur)))
             preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_dur))
-            logging.debug("i is {}, segment_no is {}, append_to_last_clip is {}".format(i, segment_no, append_to_last_clip))
-            logging.debug("i == segment_no: {}, i is segment_no: {}".format(i==segment_no, i is segment_no))
+            logging.debug("i is {}, segment_no is {}, append_to_last_clip is {}".format(i, segment_no-1, append_to_last_clip))
+            logging.debug("i == segment_no: {}, i is segment_no: {}".format(i==segment_no-1, i is segment_no-1))
             if i == segment_no-1 and append_to_last_clip:
                 logging.debug("Now clip should be from {} to {}".format(playtime, playtime+chunk_len+hangover_segment))
                 preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
