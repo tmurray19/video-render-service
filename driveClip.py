@@ -213,7 +213,7 @@ def render_video(user, compress_render=False):
                 # Blanks from the cutaway can be placed instead
                 elif interview_clip_type == "Blank":
                     
-                    logging.debug("Replacing blank {} with interview clip {}".format(
+                    logging.debug("Replacing blank {} with interview blank {}".format(
                         clip_data['Meta'].get('name'),
                         interview_clip_meta_data.get('name')
                     ))
