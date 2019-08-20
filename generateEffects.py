@@ -214,7 +214,6 @@ def better_generate_text_caption(clip, edit_data):
         return clip
 
     except Exception as e:
-        print("Exception occured in text caption generation: {}".format(e))
         logging.debug("Exception occured in text caption generation: {}".format(e))
         return clip
         

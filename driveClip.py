@@ -115,9 +115,6 @@ def render_video(user, compress_render=False):
     # Automated all the clips - Run through all the cutaway footage
     for clip_name in json_file['CutAwayFootage']:
 
-        # Testing printout
-        print(clip_name + ":")
-        print("Cutaway Timeline: {}".format(cutaway_timeline))
         logging.debug(clip_name + ":")
         logging.debug("Cutaway Timeline: {}".format(cutaway_timeline))
 
@@ -128,7 +125,6 @@ def render_video(user, compress_render=False):
 
         # If its a cutaway, just generate the clip and add a caption if it exists
         if clip_type == "CutAway":
-            print(clip_name + " is a cutaway.")
             logging.debug(clip_name + " is a cutaway.")
             clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render)
             # Generate caption data
@@ -137,7 +133,6 @@ def render_video(user, compress_render=False):
 
         # Generate image
         elif clip_type == "Image":
-            print(clip_name + " is an image.")
             logging.debug(clip_name + " is an image.")
             clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
@@ -150,7 +145,6 @@ def render_video(user, compress_render=False):
             total_insert_length = 0
             # We need to see if we can find any clips to replace the blank with
             try:
-                print(clip_name + " is a blank.")
                 logging.debug(clip_name + " is a blank.")
                 # We need to find the clip that should be playing in the interview timeline
 
@@ -177,13 +171,6 @@ def render_video(user, compress_render=False):
                     dif)
                 )
 
-                print("Interview clip starts at {}, Blank clip starts at {}, so difference is {}".format(
-                    interview_start_time,
-                    cutaway_timeline,
-                    dif)
-                )
-                
-
                 # Define clip length
                 clip_dur = sherpaUtils.calculate_clip_length(clip_data['Meta'])
 
@@ -196,7 +183,6 @@ def render_video(user, compress_render=False):
 
                 sub_clip_end = round(sub_clip_end, 2)
 
-                print("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
                 logging.debug("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
 
                 sub_clip_length = sub_clip_end - sub_clip_start
@@ -238,7 +224,6 @@ def render_video(user, compress_render=False):
                 while not isclose(total_insert_length, cutaway_blank_len):
                     some_filler = True
                     logging.debug("Clip length didn't suffice for blank, adding more files as necessary")
-                    print("Clip length didn't suffice for blank, adding more files as necessary")
 
                     time_to_fill = cutaway_blank_len - total_insert_length
 
@@ -276,7 +261,6 @@ def render_video(user, compress_render=False):
 
                     total_insert_length += next_clip.duration
                     logging.debug("Total insert length {}".format(total_insert_length))
-                    print("Total insert length {}".format(total_insert_length))
 
                     clip = concatenate_videoclips([clip, next_clip])
                 logging.debug("Blank clip '{}' has been replaced with interview clips as necessary".format(clip_name))
@@ -298,7 +282,6 @@ def render_video(user, compress_render=False):
 
         # Insert clip into correct position in array
         logging.debug("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
-        print("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
 
         cutaway_timeline = round((cutaway_timeline+clip.duration), 2)
         video_list.insert(clip_data['Meta'].get('order')-1, clip)
@@ -356,6 +339,9 @@ def render_video(user, compress_render=False):
 
     logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), round(finished_video.duration, 2)))
     logging.debug("Writing '{}' to {}".format(vid_name, vid_dir))
+
+    logging.debug("Videos placed in {} seconds".format(time.time() - start_time))
+
     # Render the finished project out into an mp4
     if compress_render:
         # Get 10 second chunks of videos
@@ -398,7 +384,7 @@ def render_video(user, compress_render=False):
             vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
             vid_dir = os.path.join(attach_dir, user, vid_name)
 
-            logging.debug("Rendering {}".format(vid_name))
+            logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time)))
             video.write_videofile(
                 vid_dir,
                 threads=8,
@@ -424,3 +410,4 @@ def render_video(user, compress_render=False):
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
 
+render_video("1149", True)
