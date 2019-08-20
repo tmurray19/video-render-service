@@ -374,6 +374,7 @@ def render_video(user, compress_render=False):
                 preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
             playtime+=chunk_len
             logging.debug("Segment {} is {}s long".format(i, preview_clip.duration))
+            preview_clip.fps = 24
             preview_chunks.append(preview_clip)
 
 
