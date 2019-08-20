@@ -107,6 +107,8 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
         logging.error("No clip audio found for clip {}".format(clip_data.get('name')))
         audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
         clip = clip.set_audio(audio.set_duration(end - start))
+
+    clip = clip.set_fps(24)
     return clip
 
 
@@ -207,6 +209,7 @@ def better_generate_text_caption(clip, edit_data):
         text_caption = text_caption.set_position(
             positions[caption_data.get('screenPos')]).set_duration(dur)
         
+        text_caption = text_caption.set_fps(24)
         
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
     
