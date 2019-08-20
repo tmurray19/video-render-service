@@ -48,8 +48,8 @@ def render_video(user, compress_render=False):
     json_file = sherpaUtils.open_proj(user)
 
     # Get timeline lengths
-    cutaway_timeline_length = sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage'])
-    interview_timeline_length = sherpaUtils.calculate_timeline_length(json_file['InterviewFootage'])
+    cutaway_timeline_length = round(sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage']), 2)
+    interview_timeline_length = round(sherpaUtils.calculate_timeline_length(json_file['InterviewFootage']), 2)
 
     logging.debug("Cutaway length: {}s      Interview length: {}s".format(cutaway_timeline_length, interview_timeline_length))
 
@@ -70,7 +70,14 @@ def render_video(user, compress_render=False):
         )[0]
 
         # Calculate when the clip om the interview timeline should be playing (globally), and returns the length that the blank clip should be
-        blank_len = sherpaUtils.calculate_time_at_clip(current_interview_clip['Meta'], json_file['InterviewFootage'], timeline_len=cutaway_timeline_length)
+        blank_len = round(
+            sherpaUtils.calculate_time_at_clip(
+                current_interview_clip['Meta'], 
+                json_file['InterviewFootage'], 
+                timeline_len=cutaway_timeline_length
+                ), 
+            2
+        )
 
 
         # Creating a blank clip to insert into time
@@ -99,7 +106,7 @@ def render_video(user, compress_render=False):
         json_file[smallest_timeline].update(end_of_line_blank)
 
         # Update the length
-        cutaway_timeline_length += blank_len
+        cutaway_timeline_length = round((cutaway_timeline_length+blank_len),2)
         logging.debug("Cutaway length: {}, Inteview length: {}".format(cutaway_timeline_length, interview_timeline_length))
             
         smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
@@ -154,12 +161,14 @@ def render_video(user, compress_render=False):
                     clip_timeline=cutaway_timeline
                 )
 
+                interview_start_time = round(interview_start_time, 2)
+
                 interview_clip_meta_data = relevant_interview_clip_data['Meta']
 
                 interview_clip_ord = interview_clip_meta_data.get('order')
 
                 # Difference between the current time in the video, and the start time of the interview clip
-                dif = cutaway_timeline-interview_start_time
+                dif = round(cutaway_timeline-interview_start_time, 2)
 
                 
                 logging.debug("Interview clip starts at {}, Blank clip starts at {}, so difference is {}".format(
@@ -184,6 +193,8 @@ def render_video(user, compress_render=False):
                     ((interview_clip_meta_data.get('startTime')) + dif + clip_dur), 
                     interview_clip_meta_data.get('endTime')
                 )
+
+                sub_clip_end = round(sub_clip_end, 2)
 
                 print("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
                 logging.debug("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
@@ -289,7 +300,7 @@ def render_video(user, compress_render=False):
         logging.debug("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
         print("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
 
-        cutaway_timeline += clip.duration
+        cutaway_timeline = round((cutaway_timeline+clip.duration), 2)
         video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
     # Printout at end
@@ -343,7 +354,7 @@ def render_video(user, compress_render=False):
     vid_dir = os.path.join(attach_dir, user, vid_name)
 
 
-    logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), finished_video.duration))
+    logging.debug("Rendering {} clip(s) together, of total length {}.".format(len(video_list), round(finished_video.duration, 2)))
     logging.debug("Writing '{}' to {}".format(vid_name, vid_dir))
     # Render the finished project out into an mp4
     if compress_render:
@@ -351,32 +362,29 @@ def render_video(user, compress_render=False):
         logging.debug("Splitting video up into 10s chunks.")
         
         # Initialising variables
-        finished_dur = finished_video.duration
+        finished_dur = round(finished_video.duration, 2)
         chunk_len = Config.PREVIEW_CHUNK_LENGTH
         preview_chunks = []
         playtime = 0
-        append_to_last_clip = True
 
         # Getting segment amount (rounded up to account for section that doesn't fit within chunk lenght)
         segment_no = ceil(finished_dur/chunk_len)
         # hangover segment
-        mod = finished_dur//chunk_len
-        hangover_segment = finished_dur % mod
-        if hangover_segment > chunk_len / 2:
-            append_to_last_clip = False
 
-        logging.debug("Hnagover Segment: {}, append to last clip: {}".format(hangover_segment, append_to_last_clip))
         logging.debug("Video duration: {}s  /{}s = {} segments      full segments: {}".format(finished_dur, chunk_len, finished_dur/chunk_len, segment_no))
 
         # _ is for non important variable
         for i in range(segment_no):
             preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_dur))
-            if i == segment_no-1 and append_to_last_clip:
-                logging.debug("Now clip should be from {} to {}".format(playtime, playtime+chunk_len+hangover_segment))
-                preview_clip = finished_video.subclip(playtime, playtime+chunk_len+hangover_segment)
+            logging.debug("Clip is currently from {} to {}".format(playtime, round(min(playtime+chunk_len, finished_dur), 2)))
+
             playtime+=chunk_len
-            logging.debug("Segment {} is {}s long".format(i, preview_clip.duration))
+            logging.debug("Segment {} is {}s long".format(i, round(preview_clip.duration, 2)))
             preview_clip.fps = 24
+            if preview_clip.duration < chunk_len/2:
+                logging.debug("Clip is smaller than {}s, so appending it to last clip instead.")
+                preview_clip = concatenate_videoclips([preview_clip, preview_chunks[-1]])
+                del preview_chunks[-1]
             preview_chunks.append(preview_clip)
 
 
@@ -416,3 +424,4 @@ def render_video(user, compress_render=False):
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
 
+render_video("1149", True)
