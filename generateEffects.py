@@ -63,13 +63,13 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     dur = end - start
 
     
-    vid_size = (582, 480) if compressed else (1920, 1080)
+    vid_size = (852, 480) if compressed else (1920, 1080)
 
-    blank_clip = myp.VideoFileClip(os.path.join(resource_path, Config.BLANK_PATH)).subclip(
-        start,
-        end
-    ).resize(vid_size)
-
+    blank_clip = myp.ColorClip(
+        size=vid_size,
+        color=(0, 0, 0),
+        duration=dur
+    )
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
@@ -100,7 +100,7 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
     if not compressed:
         clip = clip.resize((1920, 1080)) 
     
-    logging.debug("clip '{}' length: {}".format(clip_data.get('name'), clip.duration))
+    logging.debug("clip '{}' length: {}".format(clip_data.get('name'), round(clip.duration, 2)))
 
     if clip.audio is None:
         logging.error("No clip audio found for clip {}".format(clip_data.get('name')))
