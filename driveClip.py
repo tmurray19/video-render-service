@@ -1,7 +1,7 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
 from config import Config
 from datetime import datetime
-from math import ceil
+from math import ceil, isclose
 import generateEffects, sherpaUtils, os, time, logging, gc
 
 
@@ -224,7 +224,7 @@ def render_video(user, compress_render=False):
                 total_insert_length = round(total_insert_length, 3)
 
                 # If the blank length is longer than the length of the videos being inserted
-                while total_insert_length < cutaway_blank_len:
+                while not isclose(total_insert_length, cutaway_blank_len):
                     some_filler = True
                     logging.debug("Clip length didn't suffice for blank, adding more files as necessary")
                     print("Clip length didn't suffice for blank, adding more files as necessary")
@@ -352,14 +352,16 @@ def render_video(user, compress_render=False):
         
         # Initialising variables
         finished_dur = finished_video.duration
-        chunk_len = 10
+        chunk_len = Config.PREVIEW_CHUNK_LENGTH
         preview_chunks = []
         playtime = 0
         append_to_last_clip = True
 
-        # Getting segment numbers, and determining if a hangover segment is necessary
+        # Getting segment amount (rounded up to account for section that doesn't fit within chunk lenght)
         segment_no = ceil(finished_dur/chunk_len)
-        hangover_segment = finished_dur - finished_dur/chunk_len
+        # hangover segment
+        mod = finished_dur//chunk_len
+        hangover_segment = finished_dur % mod
         if hangover_segment > chunk_len / 2:
             append_to_last_clip = False
 

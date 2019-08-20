@@ -22,5 +22,6 @@ class Config(object):
     # Defining name of json file containing edits
     PROJECT_NAME = os.environ.get('PROJECT_NAME') or 'FinalSubclipJson.json'
     BLANK_PATH = os.environ.get('BLANK_PATH') or 'blank.mp4'
+    PREVIEW_CHUNK_LENGTH = os.environ.get('PREVIEW_CHUNK_LENGTH') or 10
 
 
