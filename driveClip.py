@@ -424,4 +424,3 @@ def render_video(user, compress_render=False):
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
 
-render_video("1149", True)
