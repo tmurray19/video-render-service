@@ -74,7 +74,7 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
-    blank_clip = blank_clip.set_fps(24)
+    blank_clip.fps = 24
 
     return blank_clip
 
@@ -108,7 +108,7 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
         audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
         clip = clip.set_audio(audio.set_duration(end - start))
 
-    clip = clip.set_fps(24)
+    clip.fps = 24
     return clip
 
 
@@ -125,7 +125,7 @@ def generate_image_clip(clip_data, user):
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     image_clip = image_clip.set_audio(audio.set_duration(clip_data.get('duration')))
-    image_clip = image_clip.set_fps(24)
+    image_clip.fps = 24
 
     logging.debug("Image clip successfully generated.")
 
@@ -209,8 +209,7 @@ def better_generate_text_caption(clip, edit_data):
         text_caption = text_caption.set_position(
             positions[caption_data.get('screenPos')]).set_duration(dur)
         
-        text_caption = text_caption.set_fps(24)
-        
+        text_caption.fps = 24
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
     
         return clip
