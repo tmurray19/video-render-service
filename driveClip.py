@@ -224,7 +224,7 @@ def render_video(user, compress_render=False):
                 total_insert_length = round(total_insert_length, 3)
 
                 # If the blank length is longer than the length of the videos being inserted
-                while total_insert_length != cutaway_blank_len:
+                while total_insert_length < cutaway_blank_len:
                     some_filler = True
                     logging.debug("Clip length didn't suffice for blank, adding more files as necessary")
                     print("Clip length didn't suffice for blank, adding more files as necessary")

@@ -21,5 +21,6 @@ class Config(object):
     SHARE_NAME = os.environ.get('SHARE_NAME') or 'cs-william-squarev-media-10037ffe909d3982' #'testingazure'  # 
     # Defining name of json file containing edits
     PROJECT_NAME = os.environ.get('PROJECT_NAME') or 'FinalSubclipJson.json'
+    BLANK_PATH = os.environ.get('BLANK_PATH') or 'blank.mp4'
 
 
