@@ -10,7 +10,7 @@ import generateEffects, sherpaUtils, os, time, logging, gc
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 
-def render_video(user, compress_render=False):
+def render_video(user, compress_render=False, chunk_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
     compress_render: Bool -> Set to true if you want this function to return a quick render
@@ -343,7 +343,7 @@ def render_video(user, compress_render=False):
     logging.debug("Videos placed in {} seconds".format(time.time() - start_time))
 
     # Render the finished project out into an mp4
-    if compress_render:
+    if chunk_render:
         # Get 10 second chunks of videos
         logging.debug("Splitting video up into 10s chunks.")
         
@@ -394,7 +394,17 @@ def render_video(user, compress_render=False):
                 remove_temp=True,
                 fps=24
             )
-
+            
+    if compress_render:
+        finished_video.write_videofile(
+            vid_dir,
+            threads=8,
+            preset="ultrafast",
+            bitrate="2500k",
+            audio_codec="aac",
+            remove_temp=True,
+        )
+        
     else:
         logging.debug("Rendering {}".format(vid_name))
         finished_video.write_videofile(            

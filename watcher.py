@@ -66,7 +66,7 @@ class Handler(FileSystemEventHandler):
                 logging.debug("Project ID is {}".format(proj_id))
                 try:
                     logging.debug("Starting render serivce...")
-                    p = Process(target=driveClip.render_video, args=(proj_id, json_data["compressedRender"],))
+                    p = Process(target=driveClip.render_video, args=(proj_id, json_data["compressedRender"], json_data["chunkRender"],))
                     #driveClip.render_video(proj_id, compress_render=json_data["compressedRender"])
                     p.start()
                     p.join()
