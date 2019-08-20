@@ -398,6 +398,7 @@ def render_video(user, compress_render=False):
                 bitrate="1000k",
                 audio_codec="aac",
                 remove_temp=True,
+                fps=24
             )
 
     else:
@@ -408,6 +409,7 @@ def render_video(user, compress_render=False):
             audio_codec="aac",
             bitrate="8000k",
             remove_temp=True,
+            fps=24
         )
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
