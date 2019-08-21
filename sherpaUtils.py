@@ -1,6 +1,7 @@
 import os
 import json
 from config import Config
+from math import isclose
 import logging
 
 # Defining the location of the Azure File Share and the name of the json file to look for in a given project
@@ -28,7 +29,7 @@ def calculate_clip_length(clip_data):
     start = clip_data.get('startTime')
     end = clip_data.get('endTime')
 
-    return end - start
+    return round((end - start), 2)
 
 
 # Find currently playing interview footage, and returns the JSON item
@@ -97,8 +98,8 @@ def calculate_time_at_clip(clip_data, clip_timeline_data, timeline_len=None):
             runtime += clip_time
 
     if timeline_len is not None:
-        return runtime - timeline_len
-    return runtime
+        return round((runtime - timeline_len), 2)
+    return round(runtime, 2)
 
 
 def give_clip_order(clip_order, json_data):

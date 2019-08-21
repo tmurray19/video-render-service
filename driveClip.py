@@ -1,4 +1,4 @@
-from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip
+from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip, AudioFileClip
 from config import Config
 from datetime import datetime
 from math import ceil, isclose
@@ -70,15 +70,11 @@ def render_video(user, compress_render=False, chunk_render=False):
         )[0]
 
         # Calculate when the clip om the interview timeline should be playing (globally), and returns the length that the blank clip should be
-        blank_len = round(
-            sherpaUtils.calculate_time_at_clip(
-                current_interview_clip['Meta'], 
-                json_file['InterviewFootage'], 
-                timeline_len=cutaway_timeline_length
-                ), 
-            2
+        blank_len = sherpaUtils.calculate_time_at_clip(
+            current_interview_clip['Meta'], 
+            json_file['InterviewFootage'], 
+            timeline_len=cutaway_timeline_length
         )
-
 
         # Creating a blank clip to insert into time
         blank_name = "end_of_line_blank_" + str(blank_no)
@@ -129,6 +125,7 @@ def render_video(user, compress_render=False, chunk_render=False):
             clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render)
             # Generate caption data
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
+            logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
         # Generate image
@@ -136,6 +133,7 @@ def render_video(user, compress_render=False, chunk_render=False):
             logging.debug(clip_name + " is an image.")
             clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
+            logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))            
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
         # If it's a blank
@@ -276,7 +274,7 @@ def render_video(user, compress_render=False, chunk_render=False):
                     logging.debug("Rendering out blank file found in cutaway timeline instead")
                     clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
                     clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
-
+                    logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))
                     top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
 
@@ -293,8 +291,10 @@ def render_video(user, compress_render=False, chunk_render=False):
     # We need to insert the intro if it exists
     if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
         intro_clip = VideoFileClip(os.path.join(attach_dir, user, "intro.mp4"))
-        intro_clip.set_audio(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
+        intro_audio = AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
+        intro_clip = intro_clip.set_audio(intro_audio.set_duration(intro_clip.duration))
         video_list.insert(0, intro_clip)
+        logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(intro_clip, intro_clip.audio))
         top_audio.insert(0, intro_clip.audio)
 
 
@@ -419,5 +419,3 @@ def render_video(user, compress_render=False, chunk_render=False):
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
-
-render_video("1149", True)
