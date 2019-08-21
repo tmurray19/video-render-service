@@ -21,11 +21,11 @@ positions = {
 }
 
 sizes = {
-    "small": 12,
-    "medium": 20,
-    "large": 80,
-    "x-large": 160,
-    "xx-large": 400
+    "Small": 12,
+    "Medium": 20,
+    "Large": 80,
+    "X-Large": 160,
+    "XX-Large": 400
 }
 
 music_list = {
@@ -201,7 +201,7 @@ def better_generate_text_caption(clip, edit_data):
         # Define Text Data
         text_caption = myp.TextClip(
             txt=caption_data.get('text'),
-            fontsize=caption_data.get('fontSize'),
+            fontsize=sizes[caption_data.get('fontSize')],
             color=caption_data.get('fontColour'),
         )
 
