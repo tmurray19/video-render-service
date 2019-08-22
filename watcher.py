@@ -8,6 +8,7 @@ import json
 from multiprocessing import Process
 from datetime import datetime
 import logging
+import sys
 
 class Watcher:
     DIRECTORY_TO_WATCH = os.path.join(Config.BASE_DIR, Config.QUEUE_LOCATION)
@@ -80,6 +81,9 @@ class Handler(FileSystemEventHandler):
                 except Exception as ex:
                     logging.error("Exception occured:")
                     logging.error(ex)
+                    return
+                except:
+                    logging.error("Unexpected error: {}".format(sys.exc_info()[0]))
                     return
                 # Update the complete time at the end and dump it to file 
                 logging.debug("Updating JSON status file")
