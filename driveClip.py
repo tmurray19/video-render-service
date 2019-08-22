@@ -245,7 +245,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     time_to_fill = round(time_to_fill, 2)
 
                     logging.debug("Time left to fill is {}".format(time_to_fill))
-                    print(time_to_fill)
 
                     interview_clip_ord+=1
 
@@ -304,7 +303,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         cutaway_timeline = round((cutaway_timeline+clip.duration), 2)
         video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
-    # Printout at end
+    # Video list
     logging.debug("Video list:")
     logging.debug(video_list)
 
