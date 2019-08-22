@@ -441,7 +441,8 @@ def render_video(user, compress_render=False, chunk_render=False):
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
-
+"""
 render_video("1161")
 render_video("1161", chunk_render=True)
 render_video("1161", compress_render=True)
+"""
