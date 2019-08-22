@@ -83,7 +83,6 @@ class Handler(FileSystemEventHandler):
                     logging.error(ex)
                     return
 
-                    
                 # Update the complete time at the end and dump it to file 
                 logging.debug("Updating JSON status file")
                 json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")

@@ -400,7 +400,7 @@ def render_video(user, compress_render=False, chunk_render=False):
                 logging.error("Fatal error occured while writing video - Chunk Render")
                 logging.exception("")
                 logging.error("Exiting program without writing video file correctly")                
-                return
+                return Exception
             
     if compress_render:
         logging.debug("Running compress render instance")
@@ -418,7 +418,7 @@ def render_video(user, compress_render=False, chunk_render=False):
             logging.error("Fatal error occured while writing video - Compressed Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            return
+            return Exception
         
     else:
         logging.debug("Running full render instance")
@@ -436,7 +436,7 @@ def render_video(user, compress_render=False, chunk_render=False):
             logging.error("Fatal error occured while writing video - Full Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            return
+            return Exception
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
