@@ -241,3 +241,11 @@ def open_music(music_data, dur):
     except Exception as e:
         logging.error("Exception occured during open_music: {}".format(e))
         return 0
+
+def create_intro_clip(proj_id):
+    logging.debug("Adding intro clip")
+    intro_clip = myp.VideoFileClip(os.path.join(attach_dir, proj_id, "intro.mp4"))
+    logging.debug("Intro clip is {}s long".format(intro_clip.duration))
+    intro_audio = myp.AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
+    intro_clip = intro_clip.set_audio(intro_audio.set_duration(intro_clip.duration))
+    return intro_clip

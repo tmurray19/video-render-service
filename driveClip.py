@@ -1,4 +1,4 @@
-from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, VideoFileClip, AudioFileClip
+from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
 from config import Config
 from datetime import datetime
 from math import ceil, isclose
@@ -290,13 +290,12 @@ def render_video(user, compress_render=False, chunk_render=False):
 
     # We need to insert the intro if it exists
     if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
-        intro_clip = VideoFileClip(os.path.join(attach_dir, user, "intro.mp4"))
-        intro_audio = AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
-        intro_clip = intro_clip.set_audio(intro_audio.set_duration(intro_clip.duration))
+        intro_clip = generateEffects.create_intro_clip(user)
         video_list.insert(0, intro_clip)
         logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(intro_clip, intro_clip.audio))
         top_audio.insert(0, intro_clip.audio)
-
+    else:
+        logging.error("No intro clip found, continuing")
 
     # Create audio from the interview Footage
     bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
@@ -344,6 +343,7 @@ def render_video(user, compress_render=False, chunk_render=False):
 
     # Render the finished project out into an mp4
     if chunk_render:
+        logging.debug("Running chunk render instance")
         # Get 10 second chunks of videos
         logging.debug("Splitting video up into 10s chunks.")
         
@@ -380,12 +380,32 @@ def render_video(user, compress_render=False, chunk_render=False):
 
         logging.debug("Rendering out {} videos in {}s chunks".format(len(preview_chunks), chunk_len))
 
+        
         for video in preview_chunks:
-            vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
-            vid_dir = os.path.join(attach_dir, user, vid_name)
+            try:
+                vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
+                vid_dir = os.path.join(attach_dir, user, vid_name)
 
-            logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time)))
-            video.write_videofile(
+                logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time)))
+                video.write_videofile(
+                    vid_dir,
+                    threads=8,
+                    preset="ultrafast",
+                    bitrate="1000k",
+                    audio_codec="aac",
+                    remove_temp=True,
+                    fps=24
+                )
+            except:
+                logging.error("Fatal error occured while writing video - Chunk Render")
+                logging.exception("")
+                logging.error("Exiting program without writing video file correctly")                
+                return
+            
+    if compress_render:
+        logging.debug("Running compress render instance")
+        try:
+            finished_video.write_videofile(
                 vid_dir,
                 threads=8,
                 preset="ultrafast",
@@ -394,28 +414,34 @@ def render_video(user, compress_render=False, chunk_render=False):
                 remove_temp=True,
                 fps=24
             )
-            
-    if compress_render:
-        finished_video.write_videofile(
-            vid_dir,
-            threads=8,
-            preset="ultrafast",
-            bitrate="2500k",
-            audio_codec="aac",
-            remove_temp=True,
-        )
+        except:
+            logging.error("Fatal error occured while writing video - Compressed Render")
+            logging.exception("")
+            logging.error("Exiting program without writing video file correctly")
+            return
         
     else:
-        logging.debug("Rendering {}".format(vid_name))
-        finished_video.write_videofile(            
-            vid_dir,
-            threads=8,
-            audio_codec="aac",
-            bitrate="8000k",
-            remove_temp=True,
-            fps=24
-        )
+        logging.debug("Running full render instance")
+        try:
+            logging.debug("Rendering {}".format(vid_name))
+            finished_video.write_videofile(            
+                vid_dir,
+                threads=8,
+                audio_codec="aac",
+                bitrate="8000k",
+                remove_temp=True,
+                fps=24
+            )
+        except:
+            logging.error("Fatal error occured while writing video - Full Render")
+            logging.exception("")
+            logging.error("Exiting program without writing video file correctly")
+            return
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
+
+render_video("1161")
+render_video("1161", chunk_render=True)
+render_video("1161", compress_render=True)

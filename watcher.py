@@ -78,9 +78,6 @@ class Handler(FileSystemEventHandler):
                         pass
                     else:
                         return
-                except IndexError as e:
-                    logging.error("Error: {}".format(e))
-                    return
                 except Exception as ex:
                     logging.error("Exception occured:")
                     logging.error(ex)
