@@ -78,13 +78,14 @@ class Handler(FileSystemEventHandler):
                         pass
                     else:
                         return
+                except IndexError as e:
+                    logging.error("Error: {}".format(e))
+                    return
                 except Exception as ex:
                     logging.error("Exception occured:")
                     logging.error(ex)
                     return
-                except:
-                    logging.error("Unexpected error: {}".format(sys.exc_info()[0]))
-                    raise
+
                     
                 # Update the complete time at the end and dump it to file 
                 logging.debug("Updating JSON status file")
