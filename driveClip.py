@@ -10,7 +10,7 @@ import generateEffects, sherpaUtils, os, time, logging, gc
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 
-def render_video(user, compress_render=False, chunk_render=False):
+def render_video(user, send_end, compress_render=False, chunk_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
     compress_render: Bool -> Set to true if you want this function to return a quick render
@@ -45,7 +45,22 @@ def render_video(user, compress_render=False, chunk_render=False):
     cutaway_timeline = 0
 
     # Look for the json file in the project folder
+    #try:
     json_file = sherpaUtils.open_proj(user)
+    """    except FileNotFoundError as e:
+    logging.error("File or folder cannot be found")
+    logging.error(e)
+    results = "Render exited without error [Unable to find file or folder]", -1        
+    send_end.send(results)
+    return"""
+
+
+    if not json_file['CutAwayFootage'] and not json_file['InterviewFootage']:
+        logging.error("This project seems to have no edit data recorded. Exiting render session")
+        results = "Render exited without error [No edit data exists in JSON]", -1        
+        send_end.send(results)
+        return
+
 
     # Get timeline lengths
     cutaway_timeline_length = round(sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage']), 2)
@@ -343,6 +358,20 @@ def render_video(user, compress_render=False, chunk_render=False):
 
     # Render the finished project out into an mp4
     if chunk_render:
+        if finished_video<Config.PREVIEW_CHUNK_LENGTH:
+                logging.debug("Rendering Video as it's smaller than chunk lenght")
+                finished_video.write_videofile(
+                    vid_dir,
+                    threads=8,
+                    preset="ultrafast",
+                    bitrate="1000k",
+                    audio_codec="aac",
+                    remove_temp=True,
+                    fps=24
+                )
+                results = "Video Rendered Successfully", 1
+                send_end.send(results)
+                return
         logging.debug("Running chunk render instance")
         # Get 10 second chunks of videos
         logging.debug("Splitting video up into 10s chunks.")
@@ -396,11 +425,16 @@ def render_video(user, compress_render=False, chunk_render=False):
                     remove_temp=True,
                     fps=24
                 )
+
             except:
                 logging.error("Fatal error occured while writing video - Chunk Render")
                 logging.exception("")
                 logging.error("Exiting program without writing video file correctly")                
-                return Exception
+                return "Video not rendered [ERROR OCCURED] {}".format(Exception), -1
+        
+        results = "Video Rendered Successfully", 1
+        send_end.send(results)
+        return
             
     if compress_render:
         logging.debug("Running compress render instance")
@@ -413,12 +447,15 @@ def render_video(user, compress_render=False, chunk_render=False):
                 audio_codec="aac",
                 remove_temp=True,
                 fps=24
-            )
+            )        
+            results = "Video Rendered Successfully", 1
+            send_end.send(results)
+            return
         except:
             logging.error("Fatal error occured while writing video - Compressed Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            return Exception
+            return "Video not rendered [ERROR OCCURED] {}".format(Exception), -1
         
     else:
         logging.debug("Running full render instance")
@@ -431,18 +468,19 @@ def render_video(user, compress_render=False, chunk_render=False):
                 bitrate="8000k",
                 remove_temp=True,
                 fps=24
-            )
+            )        
+            results = "Video Rendered Successfully", 1
+            send_end.send(results)
+            return
         except:
             logging.error("Fatal error occured while writing video - Full Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            return Exception
+            return "Video not rendered [ERROR OCCURED] {}".format(Exception), -1
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
-"""
-render_video("1161")
-render_video("1161", chunk_render=True)
-render_video("1161", compress_render=True)
-"""
+
+
+#render_video("1125")

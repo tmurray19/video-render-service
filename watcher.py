@@ -5,7 +5,7 @@ import driveClip
 from config import Config
 import os.path
 import json
-from multiprocessing import Process
+from multiprocessing import Process, Pipe
 from datetime import datetime
 import logging
 import sys
@@ -47,6 +47,7 @@ class Handler(FileSystemEventHandler):
         # Linux is modified
         elif event.event_type == 'modified':
             time.sleep(1)
+            recv_end, send_end = Pipe(False)
             # Take any action here when a file is first created.
             print("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
             logging.debug("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
@@ -67,7 +68,7 @@ class Handler(FileSystemEventHandler):
                 logging.debug("Project ID is {}".format(proj_id))
                 try:
                     logging.debug("Starting render serivce...")
-                    p = Process(target=driveClip.render_video, args=(proj_id, json_data["compressedRender"], json_data["chunkRender"],))
+                    p = Process(target=driveClip.render_video, args=(proj_id, send_end, json_data["compressedRender"], json_data["chunkRender"],))
                     #driveClip.render_video(proj_id, compress_render=json_data["compressedRender"])
                     p.start()
                     p.join()
@@ -87,15 +88,23 @@ class Handler(FileSystemEventHandler):
                 logging.debug("Updating JSON status file")
                 json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
                 json_data['status'] = True
+                json_data['otherInfo'] = recv_end.recv()[0]
+                json_data['correctlyRendered'] = recv_end.recv()[1]
                 logging.debug("JSON Data for {}:".format(proj_id))
                 logging.debug(json_data)
                 with open(event.src_path, "w") as json_write:
                     json.dump(json_data, json_write)
-                logging.debug("File written.")
-                print("File written")
+                if recv_end.recv()[1] == 1:
+                    logging.debug("File written.")
+                    print("File written")
+                    return
+                else:
+                    logging.debug("An error may have occured during render service")
+                    return
             else:
                 logging.debug("File already rendered")
                 print("File already rendered")
+                return
 
 
 if __name__ == '__main__':
