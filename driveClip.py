@@ -10,11 +10,12 @@ import generateEffects, sherpaUtils, os, time, logging, gc
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 
 
-def render_video(user, send_end, compress_render=False, chunk_render=False):
+def render_video(user, send_end=None, compress_render=False, chunk_render=False):
     """
     User: String -> The ID of the project (User is just a hangover from previous builds)
     compress_render: Bool -> Set to true if you want this function to return a quick render
     """
+    log_name = datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_service_instance_id_{}.log".format(user)
 
     gc.collect()
 
@@ -22,7 +23,7 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
         Config.BASE_DIR,
         Config.LOGS_LOCATION,
         Config.RENDER_LOGS, 
-        datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_service_instance.log"
+        log_name
     )
 
     logging.basicConfig(
@@ -30,7 +31,7 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
         format='%(asctime)s %(levelname)-8s %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
         filename=log_file_name)
-    logging.debug("Beginning render instance")
+    logging.debug("Beginning render instance of project id {}".format(user))
 
     # For logging
     start_time = time.time()
@@ -45,14 +46,14 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
     cutaway_timeline = 0
 
     # Look for the json file in the project folder
-    #try:
-    json_file = sherpaUtils.open_proj(user)
-    """    except FileNotFoundError as e:
-    logging.error("File or folder cannot be found")
-    logging.error(e)
-    results = "Render exited without error [Unable to find file or folder]", -1        
-    send_end.send(results)
-    return"""
+    try:
+        json_file = sherpaUtils.open_proj(user)
+    except FileNotFoundError as e:
+        logging.error("File or folder cannot be found")
+        logging.error(e)
+        results = "Render exited without error [Unable to find file or folder]", -1        
+        send_end.send(results)
+        return
 
 
     if not json_file['CutAwayFootage'] and not json_file['InterviewFootage']:
@@ -194,6 +195,7 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
                     interview_clip_meta_data.get('endTime')
                 )
 
+                sub_clip_start = round(sub_clip_start, 2)
                 sub_clip_end = round(sub_clip_end, 2)
 
                 logging.debug("Sub clip starts at {}, ends at {}".format(sub_clip_start, sub_clip_end))
@@ -231,7 +233,7 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
                     clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'])
 
                 # TODO: Careful here, rounding could cause issues
-                total_insert_length = round(total_insert_length, 3)
+                total_insert_length = round(total_insert_length, 2)
 
                 # If the blank length is longer than the length of the videos being inserted
                 while not isclose(total_insert_length, cutaway_blank_len):
@@ -240,7 +242,10 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
 
                     time_to_fill = cutaway_blank_len - total_insert_length
 
+                    time_to_fill = round(time_to_fill, 2)
+
                     logging.debug("Time left to fill is {}".format(time_to_fill))
+                    print(time_to_fill)
 
                     interview_clip_ord+=1
 
@@ -250,10 +255,10 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
                     # But it's also possible that the next clip isn't bi enough either
                     # So we'll need to go further on
                     # To stop bugs, we need to set our end time as either the time left to fill, or the length of the clip
-                    end_time = min(
+                    end_time = round(min(
                         next_clip_data['Meta'].get('startTime') + time_to_fill,
                         sherpaUtils.calculate_clip_length(next_clip_data['Meta'])
-                    )
+                    ), 2)
 
                     logging.debug("End time for clip is {}".format(end_time))
 
@@ -430,7 +435,9 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
                 logging.error("Fatal error occured while writing video - Chunk Render")
                 logging.exception("")
                 logging.error("Exiting program without writing video file correctly")                
-                return "Video not rendered [ERROR OCCURED] {}".format(Exception), -1
+                results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), -1
+                send_end.send(results)
+                return
         
         results = "Video Rendered Successfully", 1
         send_end.send(results)
@@ -455,8 +462,9 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
             logging.error("Fatal error occured while writing video - Compressed Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            return "Video not rendered [ERROR OCCURED] {}".format(Exception), -1
-        
+            results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), -1
+            send_end.send(results)
+            return        
     else:
         logging.debug("Running full render instance")
         try:
@@ -476,11 +484,13 @@ def render_video(user, send_end, compress_render=False, chunk_render=False):
             logging.error("Fatal error occured while writing video - Full Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            return "Video not rendered [ERROR OCCURED] {}".format(Exception), -1
+            results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), -1
+            #send_end.send(results)
+            return
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
 
 
-#render_video("1125")
+render_video("2185")

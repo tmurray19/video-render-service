@@ -52,9 +52,7 @@ class Handler(FileSystemEventHandler):
             print("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
             logging.debug("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
             # Testing print
-            print("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
             logging.debug("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
-            print("Source path: {}".format(event.src_path))
             logging.debug("Source path: {}".format(event.src_path))
 
             # Open the file for reading
@@ -66,40 +64,29 @@ class Handler(FileSystemEventHandler):
                 proj_id = json_data["id"]
                 print("Project ID is {}".format(proj_id))
                 logging.debug("Project ID is {}".format(proj_id))
-                try:
-                    logging.debug("Starting render serivce...")
-                    p = Process(target=driveClip.render_video, args=(proj_id, send_end, json_data["compressedRender"], json_data["chunkRender"],))
-                    #driveClip.render_video(proj_id, compress_render=json_data["compressedRender"])
-                    p.start()
-                    p.join()
-                except OSError as e:
-                    logging.error("Error: {}".format(e))
-                    if e.errno == 6:
-                        logging.error("Error is safely ignorable, continuing")
-                        pass
-                    else:
-                        return
-                except Exception as ex:
-                    logging.error("Exception occured:")
-                    logging.error(ex)
-                    return
-
+                logging.debug("Starting render serivce...")
+                p = Process(target=driveClip.render_video, args=(proj_id, send_end, json_data["compressedRender"], json_data["chunkRender"],))
+                p.start()
+                p.join()
+                render_return =  recv_end.recv()
+                render_status = render_return[1]
+                info = render_return[0]
                 # Update the complete time at the end and dump it to file 
                 logging.debug("Updating JSON status file")
                 json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
                 json_data['status'] = True
-                json_data['otherInfo'] = recv_end.recv()[0]
-                json_data['correctlyRendered'] = recv_end.recv()[1]
+                json_data['correctlyRendered'] = render_status
+                json_data['otherInfo'] = info
                 logging.debug("JSON Data for {}:".format(proj_id))
                 logging.debug(json_data)
                 with open(event.src_path, "w") as json_write:
                     json.dump(json_data, json_write)
-                if recv_end.recv()[1] == 1:
-                    logging.debug("File written.")
-                    print("File written")
+                if render_status == 1:
+                    logging.debug("File written successfully.")
+                    print("File written successfully")
                     return
                 else:
-                    logging.debug("An error may have occured during render service")
+                    logging.debug("Job completed, but an error may have occured during render service")
                     return
             else:
                 logging.debug("File already rendered")

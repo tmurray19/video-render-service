@@ -89,7 +89,11 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
         end = (clip_data.get('endTime'))
 
     # Get clip with defined start and end times
-    clip = myp.VideoFileClip(os.path.join(attach_dir, user, related_file_name)).subclip(
+    clip = myp.VideoFileClip(os.path.join(attach_dir, user, related_file_name))
+    
+    if end > clip.duration:
+        end = clip.duration
+    clip = clip.subclip(
         start,
         end
     )
