@@ -84,7 +84,8 @@ class Handler(FileSystemEventHandler):
                     return
                 except:
                     logging.error("Unexpected error: {}".format(sys.exc_info()[0]))
-                    return
+                    raise
+                    
                 # Update the complete time at the end and dump it to file 
                 logging.debug("Updating JSON status file")
                 json_data['dateCompleted'] = datetime.now().strftime("%d-%b-%Y (%H:%M:%S)")
