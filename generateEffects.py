@@ -206,6 +206,7 @@ def better_generate_text_caption(clip, edit_data):
         text_caption = myp.TextClip(
             txt=caption_data.get('text'),
             fontsize=sizes[caption_data.get('fontSize')],
+            font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
         )
 
