@@ -138,6 +138,8 @@ def generate_image_clip(clip_data, user):
 def interview_audio_builder(interview_data, user):
     sound_builder = []
 
+    logging.debug("Starting sound builder instance for interview audio")
+
     # For each item in the interview timeline
     for item in interview_data:
 
@@ -255,3 +257,15 @@ def create_intro_clip(proj_id):
     intro_audio = myp.AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
     intro_clip = intro_clip.set_audio(intro_audio.set_duration(intro_clip.duration))
     return intro_clip
+
+
+def get_blank_audio(clip_data):
+    """
+    Generates a blank audio clip given the blank audio data
+    """
+
+    audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
+    audio = audio.fx(volumex, clip_data['Meta'].get("audioLevel"))
+    audio = audio.set_duration(sherpaUtils.calculate_clip_length(clip_data['Meta']))
+
+    return audio

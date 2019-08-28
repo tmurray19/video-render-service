@@ -145,7 +145,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             # Generate caption data
             logging.debug("Generating audio for {}".format(clip_name))
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
-            logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))
+            logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
         # Generate image
@@ -154,7 +154,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             clip = generateEffects.generate_image_clip(clip_data['Meta'], user)            
             logging.debug("Generating audio for {}".format(clip_name))
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
-            logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))            
+            logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
         # If it's a blank
@@ -162,6 +162,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             # These values are used later in the blank process
             some_filler = False
             total_insert_length = 0
+            top_audio.insert(clip_data['Meta'].get('order'), generateEffects.get_blank_audio(clip_data))
             # We need to see if we can find any clips to replace the blank with
             try:
                 logging.debug(clip_name + " is a blank.")
@@ -213,6 +214,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 interview_clip_type = interview_clip_meta_data.get('clipType')
 
                 # Create video clip from data found above
+                # Audio is not needed, we will insert it later
                 if interview_clip_type == "Interview":
                     logging.debug("Replacing blank {} with interview clip {}".format(
                         clip_data['Meta'].get('name'),
@@ -302,7 +304,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)            
                     logging.debug("Generating audio for {}".format(clip_name))
                     clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
-                    logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))
+                    logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                     top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
 
@@ -316,18 +318,19 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     logging.debug("Video list:")
     logging.debug(video_list)
 
+    # Create audio from the interview Footage
+    bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
+
     # We need to insert the intro if it exists
     if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
         intro_clip = generateEffects.create_intro_clip(user)
         video_list.insert(0, intro_clip)
-        logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(intro_clip, intro_clip.audio))
+        logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(intro_clip, intro_clip.audio, intro_clip.duration))
         top_audio.insert(0, intro_clip.audio)
+        bottom_audio.insert(0, intro_clip.audio)
     else:
         logging.error("No intro clip found, continuing")
-
-    # Create audio from the interview Footage
-    bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
-
+        
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)    
     logging.debug("Top audio len: {}".format(round(top_audio.duration, 2)))
@@ -380,7 +383,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     # Render the finished project out into an mp4
     if chunk_render:
         if finished_video<Config.PREVIEW_CHUNK_LENGTH:
-                logging.debug("Rendering Video as it's smaller than chunk lenght")
+                logging.debug("Rendering Video as it's smaller than chunk length")
                 finished_video.write_videofile(
                     vid_dir,
                     threads=8,
@@ -508,3 +511,5 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
+
+render_video("2199")
