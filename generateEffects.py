@@ -201,6 +201,7 @@ def better_generate_text_caption(clip, edit_data):
 
         # TODO: Change
         dur = max(1, clip.duration - 2)
+        logging.debug("Duration of text clip is {}".format(dur))
     
         # Define Text Data
         text_caption = myp.TextClip(

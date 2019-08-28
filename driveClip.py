@@ -17,8 +17,10 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     """
     log_name = datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_service_instance_id_{}.log".format(user)
 
+    # Collecting garbage to clear out memory
     gc.collect()
 
+    # Creating a logging instance for testing
     log_file_name = os.path.join(
         Config.BASE_DIR,
         Config.LOGS_LOCATION,
@@ -51,14 +53,15 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     except FileNotFoundError as e:
         logging.error("File or folder cannot be found")
         logging.error(e)
-        results = "Render exited without error [Unable to find file or folder]", -1        
+        results = "Render exited without error [Unable to find file or folder]", 0        
         send_end.send(results)
         return
 
 
+    # If a file can be found, but no edit data exists in the file
     if not json_file['CutAwayFootage'] and not json_file['InterviewFootage']:
         logging.error("This project seems to have no edit data recorded. Exiting render session")
-        results = "Render exited without error [No edit data exists in JSON]", -1        
+        results = "Render exited without error [No edit data exists in JSON]", 0        
         send_end.send(results)
         return
 
@@ -140,6 +143,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             logging.debug(clip_name + " is a cutaway.")
             clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render)
             # Generate caption data
+            logging.debug("Generating audio for {}".format(clip_name))
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
             logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -147,7 +151,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         # Generate image
         elif clip_type == "Image":
             logging.debug(clip_name + " is an image.")
-            clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
+            clip = generateEffects.generate_image_clip(clip_data['Meta'], user)            
+            logging.debug("Generating audio for {}".format(clip_name))
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
             logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))            
             top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -161,18 +166,19 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             try:
                 logging.debug(clip_name + " is a blank.")
                 # We need to find the clip that should be playing in the interview timeline
-
                 cutaway_blank_len = sherpaUtils.calculate_clip_length(clip_data['Meta'])
 
+                # Gets clip on interview timeline that should be playing, as well as its start time on the interview timeline
                 relevant_interview_clip_data, interview_start_time = sherpaUtils.current_interview_footage(
                     data=json_file,
                     clip_timeline=cutaway_timeline
                 )
 
+                # rounding for simple calculation
                 interview_start_time = round(interview_start_time, 2)
 
+                # Set metadata for clip rendering and order for timeline insert
                 interview_clip_meta_data = relevant_interview_clip_data['Meta']
-
                 interview_clip_ord = interview_clip_meta_data.get('order')
 
                 # Difference between the current time in the video, and the start time of the interview clip
@@ -195,6 +201,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     interview_clip_meta_data.get('endTime')
                 )
 
+                # Round data off for simple calculation 
                 sub_clip_start = round(sub_clip_start, 2)
                 sub_clip_end = round(sub_clip_end, 2)
 
@@ -234,6 +241,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
                 # TODO: Careful here, rounding could cause issues
                 total_insert_length = round(total_insert_length, 2)
+                logging.debug("Insert lenght: {}".format(total_insert_length))
 
                 # If the blank length is longer than the length of the videos being inserted
                 while not isclose(total_insert_length, cutaway_blank_len):
@@ -291,7 +299,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 if some_filler == False:
                     logging.error("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
                     logging.debug("Rendering out blank file found in cutaway timeline instead")
-                    clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)
+                    clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)            
+                    logging.debug("Generating audio for {}".format(clip_name))
                     clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'])
                     logging.debug("Inserting audio for clip '{}' Clip Audio is {}".format(clip_name, clip.audio))
                     top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
@@ -325,6 +334,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
         
     # Try adding the music if it exists
+    logging.debug("Attempting to add music...")
     try:
         music_data = json_file['Music']
         music = generateEffects.open_music(music_data, cutaway_timeline)
@@ -332,16 +342,19 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         if music.duration > cutaway_timeline:
             music = CompositeAudioClip([music, generateEffects.open_music(music_data, cutaway_timeline - music.duration)])
         top_audio = CompositeAudioClip([top_audio, music])
+        logging.debug("Music added successfully")
     except Exception as e:
         logging.debug("Exception occured in render - during music audio building:")
         logging.debug(e)
         finished_audio = top_audio
 
     # Try concatenating the top and bottom audio lines together
+    logging.debug("Attepting to add interview audio...")
     try:
         bottom_audio = concatenate_audioclips(bottom_audio)    
         logging.debug("Bottom audio len: {}".format(round(bottom_audio.duration, 2)))
         finished_audio = CompositeAudioClip([top_audio, bottom_audio])
+        logging.debug("Interview audio addedd successfully")
     except Exception as e:
         logging.debug("Exception occured in render - during interview audio building:")
         logging.debug(e)
@@ -433,12 +446,13 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     remove_temp=True,
                     fps=24
                 )
-
+                results = "Video Rendered Successfully", 1
+                send_end.send(results)
             except:
                 logging.error("Fatal error occured while writing video - Chunk Render")
                 logging.exception("")
                 logging.error("Exiting program without writing video file correctly")                
-                results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), -1
+                results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
                 send_end.send(results)
                 return
         
@@ -460,12 +474,12 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             )        
             results = "Video Rendered Successfully", 1
             send_end.send(results)
-            return
+            #return
         except:
             logging.error("Fatal error occured while writing video - Compressed Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), -1
+            results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
             send_end.send(results)
             return        
     else:
@@ -482,13 +496,13 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             )        
             results = "Video Rendered Successfully", 1
             send_end.send(results)
-            return
+            #return
         except:
             logging.error("Fatal error occured while writing video - Full Render")
             logging.exception("")
             logging.error("Exiting program without writing video file correctly")
-            results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), -1
-            #send_end.send(results)
+            results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
+            send_end.send(results)
             return
 
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
