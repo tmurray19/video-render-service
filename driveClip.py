@@ -320,7 +320,9 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
 
     # Concatenate the clips together
-    top_audio = concatenate_audioclips(top_audio)
+    top_audio = concatenate_audioclips(top_audio)    
+    logging.debug("Top audio len: {}".format(round(top_audio.duration, 2)))
+
         
     # Try adding the music if it exists
     try:
@@ -337,13 +339,15 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
     # Try concatenating the top and bottom audio lines together
     try:
-        bottom_audio = concatenate_audioclips(bottom_audio)
+        bottom_audio = concatenate_audioclips(bottom_audio)    
+        logging.debug("Bottom audio len: {}".format(round(bottom_audio.duration, 2)))
         finished_audio = CompositeAudioClip([top_audio, bottom_audio])
     except Exception as e:
         logging.debug("Exception occured in render - during interview audio building:")
         logging.debug(e)
         finished_audio = top_audio
 
+    logging.debug("Finished audio len: {}".format(round(finished_audio.duration, 2)))
 
     # Concatenate the video files together
     finished_video = concatenate_videoclips(video_list)
