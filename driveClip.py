@@ -330,7 +330,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         bottom_audio.insert(0, intro_clip.audio)
     else:
         logging.error("No intro clip found, continuing")
-        
+
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)    
     logging.debug("Top audio len: {}".format(round(top_audio.duration, 2)))
@@ -511,5 +511,3 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
     logging.debug("Completed in {} seconds".format(time.time() - start_time))
     logging.debug("Closing render instance")
-
-render_video("2199")
