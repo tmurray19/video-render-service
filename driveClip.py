@@ -512,7 +512,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         logging.debug("Closing render instance")
     except:
         logging.error("An unknown error has occured, causing video render instance to crash:")
-        logging.error(e)
+        logging.exception("")
         results = "Unforseen error has occured [Contact admin]", 99      
         send_end.send(results)
         return
