@@ -186,7 +186,7 @@ def interview_audio_builder(interview_data, user):
     return sound_builder
 
 
-def better_generate_text_caption(clip, edit_data):
+def better_generate_text_caption(clip, edit_data, compressed=False):
     """
     clip: moviepy clip --> The clip you wish to add the text too
     caption_data: dict --> The JSON/Dictionry data of the caption you want to add
@@ -198,7 +198,9 @@ def better_generate_text_caption(clip, edit_data):
 
     (Code should first try to look)
     """
-    try:
+    try:    
+        vid_size = (480, 852) if compressed else (1080, 1920)
+
         caption_data = edit_data['Caption']
 
         # TODO: Change
@@ -215,7 +217,8 @@ def better_generate_text_caption(clip, edit_data):
 
         text_caption = text_caption.set_position(
             positions[caption_data.get('screenPos')]).set_duration(dur)
-        
+        text_caption.resize(vid_size)
+
         text_caption.fps = 24
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
     
