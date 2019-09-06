@@ -253,7 +253,7 @@ def open_music(music_data, dur):
 
 def create_intro_clip(proj_id, compressed):
     logging.debug("Adding intro clip")    
-    vid_size = (480, 820) if compressed else (1080, 1920)
+    vid_size = (480, 852) if compressed else (1080, 1920)
     intro_clip = myp.VideoFileClip(
         os.path.join(attach_dir, proj_id, "intro.mp4"),
         target_resolution=vid_size
