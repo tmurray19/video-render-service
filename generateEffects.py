@@ -1,5 +1,6 @@
 import moviepy.editor as myp
 from moviepy.audio.fx.volumex import volumex
+from moviepy.video.fx.resize import resize
 import sherpaUtils
 import os
 from config import Config
@@ -252,10 +253,11 @@ def open_music(music_data, dur):
 
 def create_intro_clip(proj_id, compressed):
     logging.debug("Adding intro clip")    
-    compress_vid_size = (852, 480) 
-    intro_clip = myp.VideoFileClip(os.path.join(attach_dir, proj_id, "intro.mp4"))
-    if compressed:
-        intro_clip = intro_clip.fx.all.resize(compress_vid_size)
+    vid_size = (480, 820) if compressed else (1080, 1920)
+    intro_clip = myp.VideoFileClip(
+        os.path.join(attach_dir, proj_id, "intro.mp4"),
+        target_resolution=vid_size
+        )
     logging.debug("Intro clip is {}s long".format(intro_clip.duration))
     intro_audio = myp.AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
     intro_clip = intro_clip.set_audio(intro_audio.set_duration(intro_clip.duration))
