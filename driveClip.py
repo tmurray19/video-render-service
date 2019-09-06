@@ -324,7 +324,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
         # We need to insert the intro if it exists
         if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
-            intro_clip = generateEffects.create_intro_clip(user)
+            intro_clip = generateEffects.create_intro_clip(user, compress_render)
             video_list.insert(0, intro_clip)
             logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(intro_clip, intro_clip.audio, intro_clip.duration))
             top_audio.insert(0, intro_clip.audio)
