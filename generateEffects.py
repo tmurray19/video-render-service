@@ -199,10 +199,11 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
     (Code should first try to look)
     """
     try:    
-        vid_size = (480, 852) if compressed else (1080, 1920)
-
         caption_data = edit_data['Caption']
 
+        font_size = sizes[caption_data.get('fontSize')]/2 if compressed else sizes[caption_data.get('fontSize')]
+        logging.debug("Font size is {}, converted to {}".format(caption_data.get('fontSize'), font_size))
+    
         # TODO: Change
         dur = max(1, clip.duration - 2)
         logging.debug("Duration of text clip is {}".format(dur))
@@ -210,14 +211,13 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         # Define Text Data
         text_caption = myp.TextClip(
             txt=caption_data.get('text'),
-            fontsize=sizes[caption_data.get('fontSize')],
+            fontsize=font_size,
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
         )
 
         text_caption = text_caption.set_position(
             positions[caption_data.get('screenPos')]).set_duration(dur)
-        text_caption.resize(vid_size)
 
         text_caption.fps = 24
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
