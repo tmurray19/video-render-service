@@ -505,3 +505,5 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         logging.exception("")
         results = "Unforseen error has occured [Contact admin]", 99      
         return
+
+render_video("2220", compress_render=True)
