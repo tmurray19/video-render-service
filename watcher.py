@@ -52,8 +52,14 @@ class Handler(FileSystemEventHandler):
             print("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
             logging.debug("Received event {} for file {} - Beginning render job." .format(event.event_type, event.src_path))
             # Testing print
-            logging.debug("File found: {}".format(os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)))
+            f = os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)
+            pid, rend_type, other = f.split("_", 2)
+            print(pid)
+            print(rend_type)
+            print(other)
+            logging.debug("File found: {}".format(f))
             logging.debug("Source path: {}".format(event.src_path))
+            logging.debug("Render type: {}".format(rend_type))
 
             # Open the file for reading
             json_file = open(event.src_path, 'r')
@@ -65,7 +71,10 @@ class Handler(FileSystemEventHandler):
                 print("Project ID is {}".format(proj_id))
                 logging.debug("Project ID is {}".format(proj_id))
                 logging.debug("Starting render serivce...")
-                p = Process(target=driveClip.render_video, args=(proj_id, send_end, json_data["compressedRender"], json_data["chunkRender"],))
+                compress = True if rend_type == "preview" else False
+                chunk = True if rend_type == "chunk" else False
+                logging.debug("Compress status: {}, Chunk status: {}".format(compress, chunk))
+                p = Process(target=driveClip.render_video, args=(proj_id, send_end, compress, chunk,))
                 p.start()
                 p.join()
                 render_return =  recv_end.recv()
