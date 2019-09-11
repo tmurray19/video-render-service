@@ -5,7 +5,7 @@ import os
 # Config file
 class Config(object):
     BASE_DIR = os.environ.get('BASE_DIR') or "/mnt/csae48d5df47deax41bcxbaa"
-    #BASE_DIR = os.environ.get('BASE_DIR') or "N:/project"
+    BASE_DIR = os.environ.get('BASE_DIR') or "N:/project"
     VIDS_LOCATION = os.environ.get('VIDS_LOCATION') or "videos"
     QUEUE_LOCATION = os.environ.get('QUEUE_LOCATION') or 'renderQueue'
     LOGS_LOCATION = os.environ.get('LOGS_LOCATION') or "logs" 

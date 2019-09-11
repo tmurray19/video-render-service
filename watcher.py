@@ -68,13 +68,16 @@ class Handler(FileSystemEventHandler):
             if json_data['status'] == False:
                 # Get the ID and run the render on it
                 proj_id = json_data["id"]
+
                 print("Project ID is {}".format(proj_id))
-                logging.debug("Project ID is {}".format(proj_id))
-                logging.debug("Starting render serivce...")
+                logging.debug("Project ID is {}".format(proj_id))  
+
                 compress = True if rend_type == "preview" else False
-                chunk = True if rend_type == "chunk" else False
+                chunk = True if rend_type == "chunk" else False    
                 logging.debug("Compress status: {}, Chunk status: {}".format(compress, chunk))
-                p = Process(target=driveClip.render_video, args=(proj_id, send_end, compress, chunk,))
+
+                logging.debug("Starting render serivce...")
+                p = Process(target=driveClip.render_video, args=(proj_id, send_end, compress, chunk))
                 p.start()
                 p.join()
                 render_return =  recv_end.recv()
