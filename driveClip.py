@@ -164,7 +164,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 elif clip_type == "Blank":
                     # These values are used later in the blank process
                     some_filler = False
-                    total_insert_length = 0                            
+                    total_insert_length = 0 
+                    logging.debug("Generating audio for {}".format(clip_name))
                     logging.debug("Inserting audio for blank '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                     top_audio.insert(clip_data['Meta'].get('order'), generateEffects.get_blank_audio(clip_data))
                     # We need to see if we can find any clips to replace the blank with
@@ -306,7 +307,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                             logging.error("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
                             logging.debug("Rendering out blank file found in cutaway timeline instead")
                             clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)            
-                            logging.debug("Generating audio for {}".format(clip_name))
                             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render)
 
 
@@ -317,24 +317,10 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
             # Video list
-            vid_total = 0
-            audio_total = 0
+
             logging.debug("Video list:")
             logging.debug(video_list)
-            logging.debug("Len: {}".format(len(video_list)))
-            for item in video_list:
-                logging.debug(item)
-                logging.debug("len: {}".format(item.duration))
-                vid_total += item.duration
-            logging.debug("Video lenght: {}".format(vid_total))
-            logging.debug("Audio list:")
-            logging.debug(top_audio)
-            logging.debug("Len: {}".format(len(top_audio)))
-            for item in top_audio:
-                logging.debug(item)
-                logging.debug("len: {}".format(item.duration))
-                audio_total += item.duration
-            logging.debug("Audio lenght: {}".format(audio_total))
+
             # Create audio from the interview Footage
             bottom_audio = generateEffects.interview_audio_builder(interview_data=json_file['InterviewFootage'], user=user)
 
