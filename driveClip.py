@@ -3,7 +3,7 @@ from config import Config
 from datetime import datetime
 from math import ceil, isclose
 import generateEffects, sherpaUtils, os, time, logging, gc
-
+import chunk
 
 # TODO: This needs to be changed in the app.config to
 #  read to the correct attach directory as outlined in the configuration
@@ -127,7 +127,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 
             smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
 
-
         # Automated all the clips - Run through all the cutaway footage
         for clip_name in json_file['CutAwayFootage']:
 
@@ -162,7 +161,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             elif clip_type == "Blank":
                 # These values are used later in the blank process
                 some_filler = False
-                total_insert_length = 0
+                total_insert_length = 0                            
+                logging.debug("Inserting audio for blank '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.insert(clip_data['Meta'].get('order'), generateEffects.get_blank_audio(clip_data))
                 # We need to see if we can find any clips to replace the blank with
                 try:
@@ -305,8 +305,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)            
                         logging.debug("Generating audio for {}".format(clip_name))
                         clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render)
-                        logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
-                        top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
 
             # Insert clip into correct position in array
@@ -316,6 +314,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
         # Video list
+
         logging.debug("Video list:")
         logging.debug(video_list)
 
@@ -383,7 +382,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
         # Render the finished project out into an mp4
         if chunk_render:
-            if finished_video<Config.PREVIEW_CHUNK_LENGTH:
+            if finished_video.duration<Config.PREVIEW_CHUNK_LENGTH:
                     logging.debug("Rendering Video as it's smaller than chunk length")
                     finished_video.write_videofile(
                         vid_dir,
