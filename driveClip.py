@@ -162,7 +162,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 # These values are used later in the blank process
                 some_filler = False
                 total_insert_length = 0                            
-                logging.debug("Inserting audio for blank '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
+                logging.debug("Inserting audio for blank '{}'".format(clip_name))
                 top_audio.insert(clip_data['Meta'].get('order'), generateEffects.get_blank_audio(clip_data))
                 # We need to see if we can find any clips to replace the blank with
                 try:
