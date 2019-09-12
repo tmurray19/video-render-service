@@ -141,10 +141,10 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             # If its a cutaway, just generate the clip and add a caption if it exists
             if clip_type == "CutAway":
                 logging.debug(clip_name + " is a cutaway.")
-                clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render)
+                clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
                 # Generate caption data
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
@@ -153,7 +153,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 logging.debug(clip_name + " is an image.")
                 clip = generateEffects.generate_image_clip(clip_data['Meta'], user)            
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
 
@@ -230,7 +230,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                             compressed=compress_render
                         )
 
-                        clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'], compressed=compress_render)
+                        clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'], compressed=compress_render or chunk_render)
 
                     # Blanks from the cutaway can be placed instead
                     elif interview_clip_type == "Blank":
@@ -239,8 +239,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                             clip_data['Meta'].get('name'),
                             interview_clip_meta_data.get('name')
                         ))
-                        clip = generateEffects.generate_blank(interview_clip_meta_data, start=sub_clip_start, end=sub_clip_end, compressed=compress_render)
-                        clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'], compressed=compress_render)
+                        clip = generateEffects.generate_blank(interview_clip_meta_data, start=sub_clip_start, end=sub_clip_end, compressed=compress_render or chunk_render)
+                        clip = generateEffects.better_generate_text_caption(clip, relevant_interview_clip_data['edit'], compressed=compress_render or chunk_render)
 
                     # TODO: Careful here, rounding could cause issues
                     total_insert_length = round(total_insert_length, 2)
@@ -278,14 +278,14 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                                 clip_data=next_clip_data['Meta'],
                                 end=next_clip_data['Meta'].get('startTime')+end_time,
                                 user=user,
-                                compressed=compress_render
+                                compressed=compress_render or chunk_render
                             )
         
-                            next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'], compressed=compress_render)
+                            next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'], compressed=compress_render or chunk_render)
         
                         elif next_clip_data['Meta'].get('clipType') == "Blank":
-                            next_clip = generateEffects.generate_blank(next_clip_data['Meta'], end=end_time, compressed=compress_render)
-                            next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'], compressed=compress_render)
+                            next_clip = generateEffects.generate_blank(next_clip_data['Meta'], end=end_time, compressed=compress_render or chunk_render)
+                            next_clip = generateEffects.better_generate_text_caption(next_clip, next_clip_data['edit'], compressed=compress_render or chunk_render)
 
                         total_insert_length += next_clip.duration
                         logging.debug("Total insert length {}".format(total_insert_length))
@@ -302,9 +302,9 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     if some_filler == False:
                         logging.error("TypeError in render - No clip found to replace blank '{}'".format(clip_data['Meta'].get("name")))
                         logging.debug("Rendering out blank file found in cutaway timeline instead")
-                        clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render)            
+                        clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)            
                         logging.debug("Generating audio for {}".format(clip_name))
-                        clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render)
+                        clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
 
 
             # Insert clip into correct position in array
