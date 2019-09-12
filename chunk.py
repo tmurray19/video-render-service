@@ -19,7 +19,7 @@ def chunk_driver(json_data):
                 if json_data['CutAwayFootage'][item]['Meta'].get("clipType") == "Blank":
                     if not json_data['CutAwayFootage'][item]['edit']['Caption']:
                         # TODO: CHECK IF THIS IS THE CASE
-                        logging.debug("Blank data holds no caption, so we can assume it replaces ")
+                        logging.debug("Blank data holds no caption, so we can assume it replaces a clip")
                         # Time blank shows up in completed video 
                         blank_time_in_cutaway = sherpaUtils.calculate_time_at_clip(
                             json_data['CutAwayFootage'][item]['Meta'], 
@@ -71,18 +71,25 @@ def chunk_driver(json_data):
 
                         # Get the clip name for moviepy
                         interview_clip_name = relevant_interview_clip['Meta'].get('name')
-
-                        # Set caption data if it exists
-                        if relevant_interview_clip['edit']['Caption']:
-                            caption_data = relevant_interview_clip['edit']['Caption']
                         
                         # Interview start time should be difference between blank start time, and interview clip start time
                         # End time is start time plus clip duration
                         
 
-                        # TODO: If we need to add multiple interview clips to one blank, then we also need to 
+                        json_data['CutAwayFootage'][item]['Meta'].get('name').update(interview_clip_name)
+                        json_data['CutAwayFootage'][item]['Meta'].get('startTime').update(start_time)
+                        json_data['CutAwayFootage'][item]['Meta'].get('endTime').update(end_time)
+                        # Set caption data if it exists
+                        if relevant_interview_clip['edit']['Caption']:
+                            json_data['CutAwayFootage'][item]['edit']['Caption'].update(relevant_interview_clip['edit']['Caption'])
 
-
+                        # TODO: If we need to add multiple interview clips to one blank, then we also need to increase the
+                        # order accordingly
+                        if blank_len > interview_len:
+                            logging.debug("We have to add another clip from the interview footage")
+                            logging.debug("We must also update the order of every clip in the cutaway timeline")
+                            new_start = end_time
+                            new_end = min()
                         # We need to replace blank in interview with this clip
                         print("Check logs so far")
     else:
