@@ -7,7 +7,7 @@ import logging
 
 resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH)
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
-
+"""
 positions = {
     1: ("left", "top"),  # Top Left
     2: ("right", "top"),  # Top Right
@@ -19,10 +19,22 @@ positions = {
     8: ("center", "bottom"),  # Center bottom
     9: ("right", "bottom")  # Center right
 }
+"""
+positions = {
+    1: (0.1, 0.1),  # Top Left
+    2: (0.75, 0.1),  # Top Right
+    3: (0.5, 0.1),  # Top Center
+    4: (0.1, 0.5),  # Center Left
+    5: 0.5,  # Center of image
+    6: (0.75, 0.5),  # Center Right
+    7: (0.1, 0.9),  # Bottom Left
+    8: (0.5, 0.9),  # Bottom Center
+    9: (0.75, 0.9)  # Bottom Right
+}
 
 sizes = {
-    "Small": 12,
-    "Medium": 20,
+    "Small": 20,
+    "Medium": 40,
     "Large": 80,
     "X-Large": 160,
     "XX-Large": 400
@@ -217,7 +229,9 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         )
 
         text_caption = text_caption.set_position(
-            positions[caption_data.get('screenPos')]).set_duration(dur)
+            positions[caption_data.get('screenPos')], 
+            relative=True
+            ).set_duration(dur)
 
         text_caption.fps = 24
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
