@@ -37,7 +37,7 @@ sizes = {
     "Medium": 40,
     "Large": 80,
     "X-Large": 160,
-    "XX-Large": 400
+    "XX-Large": 240
 }
 
 music_list = {
