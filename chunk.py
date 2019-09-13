@@ -95,4 +95,21 @@ def chunk_driver(json_data):
     else:
         logging.debug("No blank replacement necessary")
         logging.debug("Rendering file")
+    # We've successfully preprocessed the json data at this point, and can now render the videos
+    for item in json_data:
+        logging.debug(item)
+        # Get clip type
+        clip_type = json_data['CutAwayFootage'][item]['Meta'].get('clipType')
+        if clip_type == "Cutaway":
+            logging.debug("'{}' is a cutaway".format(item))
+        elif clip_type == "Image":
+            logging.debug("'{}' is an image".format(item))
+        else:
+            logging.debug("'{}' is something else".format(item))
 
+
+
+            """ 
+            Just store the cliptype from the interview timeline. We mute the audio on those clips
+            Then handle the audio at the end
+            """
