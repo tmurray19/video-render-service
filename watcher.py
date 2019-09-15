@@ -54,9 +54,7 @@ class Handler(FileSystemEventHandler):
             # Testing print
             f = os.path.relpath(event.src_path, Watcher.DIRECTORY_TO_WATCH)
             pid, rend_type, other = f.split("_", 2)
-            print(pid)
-            print(rend_type)
-            print(other)
+
             logging.debug("File found: {}".format(f))
             logging.debug("Source path: {}".format(event.src_path))
             logging.debug("Render type: {}".format(rend_type))

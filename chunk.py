@@ -79,6 +79,11 @@ def chunk_driver(json_data, user, send_end=None, compress_render=False, chunk_re
                         json_data['CutAwayFootage'][item]['Meta'].get('name').update(interview_clip_name)
                         json_data['CutAwayFootage'][item]['Meta'].get('startTime').update(start_time)
                         json_data['CutAwayFootage'][item]['Meta'].get('endTime').update(end_time)
+                        json_data['CutAwayFootage'][item]['Meta'].get('clipType').update(relevant_interview_clip['Meta'].get('clipType'))
+                        
+                        time_remaining = end_time - start_time
+                        logging.debug("Time remaining to fill: '{}'".format(time_remaining))
+
                         # Set caption data if it exists
                         if relevant_interview_clip['edit']['Caption']:
                             json_data['CutAwayFootage'][item]['edit']['Caption'].update(relevant_interview_clip['edit']['Caption'])
@@ -89,11 +94,20 @@ def chunk_driver(json_data, user, send_end=None, compress_render=False, chunk_re
                             logging.debug("We have to add another clip from the interview footage")
                             logging.debug("We must also update the order of every clip in the cutaway timeline")
 
+                            # Set order to update all the other files in the list when the process is finished
                             blank_order = json_data['CutAwayFootage'][item]['Meta'].get('order')
                             clips = 1
 
-                            start_time = end_time
-                            end_time = min()
+                            # Update times
+                            # Start time is now the end time of the previous clip
+                            # End time is the smallest of:
+                            #       Start time of blank + end time of blank (When the blank ends in the cutaway)
+                            #       Start time of blank + end time of interview (When the interview end in the interview)
+                            # If the latter occurs, we need to loop again
+
+                            # TODO: Would it just be easier to split a blank up, instead 
+                            new_start = end_time
+                            new_end = min(end_time + time_remaining, start_time + blank_len)
                             
                             
                             # Finally increment every other item
