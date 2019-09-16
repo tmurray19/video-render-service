@@ -384,6 +384,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         if chunk_render:
             if finished_video.duration<Config.PREVIEW_CHUNK_LENGTH:
                     logging.debug("Rendering Video as it's smaller than chunk length")
+                    vid_dir = os.path.join(attach_dir, user, user + "_com_chunk_0_edited.mp4")
                     finished_video.write_videofile(
                         vid_dir,
                         threads=8,
