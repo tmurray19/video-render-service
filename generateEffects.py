@@ -63,17 +63,17 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     dur = end - start
 
     
-    vid_size = (852, 480) if compressed else (1920, 1080)
+    # vid_size = (852, 480) if compressed else (1920, 1080)
 
-    blank_clip = myp.ColorClip(
-        size=vid_size,
-        color=(0, 0, 0),
+    blank_clip = myp.ImageClip(
+        img=os.path.join(resource_path, 'blank.png'),
         duration=dur
     )
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
     blank_clip.fps = 24
+    blank_clip.set_opacity(1)
 
     return blank_clip
 
@@ -252,6 +252,32 @@ def open_music(music_data, dur):
     except Exception as e:
         logging.error("Exception occured during open_music: {}".format(e))
         return 0
+
+def new_music(music_track, music_vol, dur):
+    """Accept music track as dict entry
+    music volume and duration is also needed"""
+    try:
+        track_name = music_track.split('/')[-1]
+        music = myp.AudioFileClip(os.path.join(resource_path, track_name))
+        music = music.fx(volumex, music_vol)
+        # TODO: If duration is longer than music track, return a composite of clips instead
+        # But we can worry about that later
+        music = music.set_duration(dur)
+
+        music = music.audio_fadein(2)
+        music = music.audio_fadeout(2)
+
+        logging.debug(
+            "Music file '{}' chosen for video, cropped to {}s in length".format(
+                track_name, 
+                dur
+            )
+        )
+
+        return music
+    except Exception as e:
+        logging.error("Exception occured during music selection: {}".format(e))
+        return 0    
 
 def create_intro_clip(proj_id, compressed):
     logging.debug("Adding intro clip")    

@@ -1,150 +1,157 @@
 from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
 from config import Config
-import logging
+import logging, time, os
+from math import ceil
 import generateEffects, sherpaUtils
 
+attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
+
+
 def chunk_driver(json_data, user, send_end=None, compress_render=False, chunk_render=False):
-    """JSON data should be in a dict format
+    cutaways = []
+    interviews = []
+    
+    start_time = time.time()
 
-        Chunk render:
-            - Split JSON Data up into equal sized chunks (10s)
-            - Run through 10s JSON intervals
-            - Create and render clip
-    """
-    # Let's go through the cutaway footage, and preprocess any blanks
-    if json_data['InterviewFootage']:
-        for item in json_data['CutAwayFootage']:
-                logging.debug("Interview footage is not empty")
-                # Then if the given item is a blank
-                if json_data['CutAwayFootage'][item]['Meta'].get("clipType") == "Blank":
-                    if not json_data['CutAwayFootage'][item]['edit']['Caption']:
-                        # TODO: CHECK IF THIS IS THE CASE
-                        logging.debug("Blank data holds no caption, so we can assume it replaces a clip")
-                        # Time blank shows up in completed video 
-                        blank_time_in_cutaway = sherpaUtils.calculate_time_at_clip(
-                            json_data['CutAwayFootage'][item]['Meta'], 
-                            json_data['CutAwayFootage']
-                        )
-                        
-                        logging.debug("Replacing blank '{}' with cutaway footage".format(item))
-                        logging.debug("Blank '{}' is playing at time {}".format(item, blank_time_in_cutaway))
-
-                        # Get length of blank
-                        blank_len = sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][item]['Meta'])
-                        logging.debug("Blank's length is {}".format(blank_len))
-
-                        """  
-                        Get clip that should be playing on interview timeline, and its starttime
-                        Why?
-
-                        We need the clip data to move into the cutaway footage json
-
-                        Start time is important 
-                        We have the start and end time of the interview clip
-                        but we need to trim it down to fit inside the blank, chances are the blank is smaller than the interview being played
-                        Logic is the same:
-                                startTime is distance between when the blank starts playing in the main timeline, and when the interview clip starts playing
-                                startTime is beginning of blank + difference between beginning of blank and beginning of interview clip
-                                endTime is startTime + lenght of blank 
-                        Following that, we need to replace the blank with the interview clip:
-                                Change
-                        """
-                        # We have the relevant interview clip for the blank, as well as when it starts on the interview timeline
-                        relevant_interview_clip, interview_start_time = sherpaUtils.current_interview_footage(json_data, blank_time_in_cutaway)
-                        interview_start_time = round(interview_start_time, 2)
-
-                        logging.debug("Clip that should be playing over blank:")
-                        logging.debug(relevant_interview_clip)
-
-                        # Calculate length of clip - why?
-                        # We need to get end time of clip to place into the blank
-                        interview_len = sherpaUtils.calculate_clip_length(relevant_interview_clip['Meta'])
-                        logging.debug("Interview clip plays for {}s".format(interview_len))
-
-                        if blank_len>interview_len:
-                            logging.debug("We need to add more clip from the interview clips")
-                        
-                        # Start time is time blank starts in timeline + length of cutaway
-                        start_time = blank_time_in_cutaway + relevant_interview_clip['Meta'].get('startTime')
-
-                        end_time = min(start_time + interview_len, start_time + blank_len)
-
-                        # Get the clip name for moviepy
-                        interview_clip_name = relevant_interview_clip['Meta'].get('name')
-                        
-                        # Interview start time should be difference between blank start time, and interview clip start time
-                        # End time is start time plus clip duration
-                        
-
-                        json_data['CutAwayFootage'][item]['Meta'].get('name').update(interview_clip_name)
-                        json_data['CutAwayFootage'][item]['Meta'].get('startTime').update(start_time)
-                        json_data['CutAwayFootage'][item]['Meta'].get('endTime').update(end_time)
-                        json_data['CutAwayFootage'][item]['Meta'].get('clipType').update(relevant_interview_clip['Meta'].get('clipType'))
-                        
-                        time_remaining = end_time - start_time
-                        logging.debug("Time remaining to fill: '{}'".format(time_remaining))
-
-                        # Set caption data if it exists
-                        if relevant_interview_clip['edit']['Caption']:
-                            json_data['CutAwayFootage'][item]['edit']['Caption'].update(relevant_interview_clip['edit']['Caption'])
-
-                        # TODO: If we need to add multiple interview clips to one blank, then we also need to increase the
-                        # order accordingly
-                        if blank_len > interview_len:
-                            logging.debug("We have to add another clip from the interview footage")
-                            logging.debug("We must also update the order of every clip in the cutaway timeline")
-
-                            # Set order to update all the other files in the list when the process is finished
-                            blank_order = json_data['CutAwayFootage'][item]['Meta'].get('order')
-                            clips = 1
-
-                            # Update times
-                            # Start time is now the end time of the previous clip
-                            # End time is the smallest of:
-                            #       Start time of blank + end time of blank (When the blank ends in the cutaway)
-                            #       Start time of blank + end time of interview (When the interview end in the interview)
-                            # If the latter occurs, we need to loop again
-
-                            # TODO: Would it just be easier to split a blank up, instead 
-                            new_start = end_time
-                            new_end = min(end_time + time_remaining, start_time + blank_len)
-                            
-                            
-                            # Finally increment every other item
-                            for incrementer in json_data['CutAwayFootage']:
-                                if json_data['CutAwayFootage'][incrementer]['Meta'].get('order') > blank_order:
-                                    json_data['CutAwayFootage'][incrementer]['Meta'].get('order').update(json_data['CutAwayFootage'][incrementer]['Meta'].get('order')+clips)
-                        # We need to replace blank in interview with this clip
-                        print("Check logs so far")
-    else:
-        logging.debug("No blank replacement necessary")
-        logging.debug("Rendering file")
-    # We've successfully preprocessed the json data at this point, and can now render the videos
-    top_audio = []
-    for item in json_data:                
+    for item in json_data['CutAwayFootage']:               
+        logging.debug('Iterating through cutaway footage') 
         clip_data = json_data['CutAwayFootage'][item]
 
         logging.debug(item)
         # Get clip type
         clip_type = json_data['CutAwayFootage'][item]['Meta'].get('clipType')
+
         if clip_type == "Cutaway":
             logging.debug("'{}' is a cutaway".format(item))                    
             clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
             # Generate caption data
-            logging.debug("Generating audio for {}".format(item))
+            logging.debug("Creating text caption for {}".format(item))
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
-            logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(item, clip.audio, clip.duration))
-            top_audio.insert(clip_data['Meta'].get('order'), clip.audio)
-
         elif clip_type == "Image":
             logging.debug("'{}' is an image".format(item))
-        elif clip_type == "Interview":
-            logging.debug("'{}' is an interview".format(item))
+            clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
+            logging.debug("Generating text caption for '{}'".format(item))
+            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
         else:
-            logging.debug("We don't know what '{}' is".format(item))
+            logging.debug("'{}' is a blank, render transparent image".format(item))
+            clip = generateEffects.generate_blank(clip_data['Meta'])
+        cutaways.insert(clip_data['Meta'].get('order'), clip)
+
+    
+    for item in json_data['Interview']:
+        logging.debug("Iterating through interview footage")
+        clip_data = json_data['Interview'][item]
+        
+        logging.debug(item)
+
+        clip_type = json_data['Interview'][item]['Meta'].get('clipType')
+
+        
+        if clip_type == "Interview":
+            logging.debug("'{}' is an interview".format(item))                    
+            clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
+            logging.debug("Creating text caption for {}".format(item))
+            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+        elif clip_type == "Image":
+            logging.debug("'{}' is an image".format(item))
+            clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
+            logging.debug("Generating text caption for '{}'".format(item))
+            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+        else:
+            logging.debug("'{}' is a blank, render transparent image".format(item))
+            clip = generateEffects.generate_blank(clip_data['Meta'])
+        interviews.insert(clip_data['Meta'].get('order'), clip)
+
+    logging.debug('[CHUNK] Files added in {}s'.format(time.time() - start_time))
+
+    cutaways = concatenate_videoclips(cutaways)
+    interviews = concatenate_videoclips(interviews)
+
+    finished_video = CompositeVideoClip([cutaways, interviews])
 
 
-            """ 
-            Just store the cliptype from the interview timeline. We mute the audio on those clips
-            Then handle the audio at the end
-            """
+    vid_name = user + "_com_chunk_edited.mp4"
+    vid_dir = os.path.join(attach_dir, user, vid_name)    
+
+    if finished_video.duration<Config.PREVIEW_CHUNK_LENGTH:
+        logging.debug("Rendering Video as it's smaller than chunk length")
+        finished_video.write_videofile(
+            vid_dir,
+            threads=8,
+            preset="ultrafast",
+            bitrate="1000k",
+            audio_codec="aac",
+            remove_temp=True,
+            fps=24
+        )
+        results = "Video Rendered Successfully", 1
+        send_end.send(results)
+        return
+    logging.debug("Running chunk render instance")
+    # Get 10 second chunks of videos
+    logging.debug("Splitting video up into 10s chunks.")
+    
+    # Initialising variables
+    finished_dur = round(finished_video.duration, 2)
+    chunk_len = Config.PREVIEW_CHUNK_LENGTH
+    preview_chunks = []
+    playtime = 0
+
+    # Getting segment amount (rounded up to account for section that doesn't fit within chunk lenght)
+    segment_no = ceil(finished_dur/chunk_len)
+    # hangover segment
+
+    logging.debug("Video duration: {}s  /{}s = {} segments      full segments: {}".format(finished_dur, chunk_len, finished_dur/chunk_len, segment_no))
+
+    # _ is for non important variable
+    for i in range(segment_no):
+        preview_clip = finished_video.subclip(playtime, min(playtime+chunk_len, finished_dur))
+        logging.debug("Clip is currently from {} to {}".format(playtime, round(min(playtime+chunk_len, finished_dur), 2)))
+
+        playtime+=chunk_len
+        logging.debug("Segment {} is {}s long".format(i, round(preview_clip.duration, 2)))
+        preview_clip.fps = 24
+        if preview_clip.duration < chunk_len/2:
+            logging.debug("Clip is smaller than {}s, so appending it to last clip instead.")
+            preview_clip = concatenate_videoclips([preview_clip, preview_chunks[-1]])
+            del preview_chunks[-1]
+        preview_chunks.append(preview_clip)
+
+
+    
+    logging.debug("Preview chunk list: ")
+    logging.debug(preview_chunks)
+
+    logging.debug("Rendering out {} videos in {}s chunks".format(len(preview_chunks), chunk_len))
+
+    
+    for video in preview_chunks:
+        try:
+            vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
+            vid_dir = os.path.join(attach_dir, user, vid_name)
+
+            logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time)))
+            video.write_videofile(
+                vid_dir,
+                threads=8,
+                preset="ultrafast",
+                bitrate="1000k",
+                audio_codec="aac",
+                remove_temp=True,
+                fps=24
+            )
+            results = "Video Rendered Successfully", 1
+            send_end.send(results)
+        except:
+            logging.error("Fatal error occured while writing video - Chunk Render")
+            logging.exception("")
+            logging.error("Exiting program without writing video file correctly")                
+            results = "Video not rendered [ERROR OCCURED, VIEW LOGS FOR MORE DETAILS]", 99
+            send_end.send(results)
+            return
+    
+    logging.debug('[CHUNK] Process comlete in {}s'.format(time.time() - start_time))                    
+    results = "Video Rendered Successfully", 1
+    send_end.send(results)
+    return
+                        
