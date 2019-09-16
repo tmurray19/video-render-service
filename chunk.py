@@ -70,8 +70,30 @@ def chunk_driver(json_data, user, send_end=None, compress_render=False, chunk_re
     finished_video = CompositeVideoClip([cutaways, interviews])
 
 
-    vid_name = user + "_com_chunk_edited.mp4"
+    vid_name = user + "_TESTING_edited.mp4"
     vid_dir = os.path.join(attach_dir, user, vid_name)    
+    logging.debug("Running full render instance - TESTING WATCHER")
+    try:
+        logging.debug("Rendering {}".format(vid_name))
+        finished_video.write_videofile(            
+            vid_dir,
+            threads=8,
+            audio_codec="aac",
+            bitrate="8000k",
+            remove_temp=True,
+            fps=24
+        )        
+        results = "Video Rendered Successfully", 1
+        send_end.send(results)
+        return
+
+    except:
+        logging.error("Fatal error occured while writing video - Full Render")
+        logging.exception("")
+        logging.error("Exiting program without writing video file correctly")
+        results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
+        send_end.send(results)
+        return
 
     if finished_video.duration<Config.PREVIEW_CHUNK_LENGTH:
         logging.debug("Rendering Video as it's smaller than chunk length")
