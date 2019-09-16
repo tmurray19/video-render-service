@@ -22,14 +22,14 @@ positions = {
 """
 positions = {
     1: (0.1, 0.1),  # Top Left
-    2: (0.75, 0.1),  # Top Right
+    2: (0.65, 0.1),  # Top Right
     3: (0.5, 0.1),  # Top Center
     4: (0.1, 0.5),  # Center Left
     5: 0.5,  # Center of image
-    6: (0.75, 0.5),  # Center Right
-    7: (0.1, 0.9),  # Bottom Left
-    8: (0.5, 0.9),  # Bottom Center
-    9: (0.75, 0.9)  # Bottom Right
+    6: (0.65, 0.5),  # Center Right
+    7: (0.1, 0.8),  # Bottom Left
+    8: (0.5, 0.8),  # Bottom Center
+    9: (0.65, 0.8)  # Bottom Right
 }
 
 sizes = {
