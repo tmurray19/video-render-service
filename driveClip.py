@@ -191,11 +191,11 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             
         else:
             logging.error("No intro clip found, continuing")
-
+        """
 
         if json_file['MusicTrackURL'] is not None:
             generateEffects.new_music(json_file['MusicTrackURL'], int(json_file['MusicAudioLevel']), finished_video.duration) 
-                
+              """  
 
         # Defining path here is cleaner
         vid_name = user + "_com_preview_edited.mp4" if compress_render else user + "_edited.mp4"
@@ -271,13 +271,14 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         vid_dir,
                         threads=8,
                         preset="ultrafast",
-                        bitrate="1000k",
+                        bitrate="700k",
                         audio_codec="aac",
                         remove_temp=True,
                         fps=24
                     )
                     results = "Video Rendered Successfully", 1
-                    send_end.send(results)
+                    if send_end is not None:
+                        send_end.send(results)
                 except:
                     logging.error("Fatal error occured while writing video - Chunk Render")
                     logging.exception("")
@@ -345,4 +346,4 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         send_end.send(results)
         return
 
-render_video("1149", compress_render=True)
+render_video("1149", chunk_render=True)
