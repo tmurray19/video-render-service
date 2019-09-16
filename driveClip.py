@@ -128,7 +128,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
 
         if chunk_render is True:
-            chunk.chunk_driver(json_file, user, compress_render=compress_render, chunk_render=chunk_render)
+            chunk.chunk_driver(json_file, user, send_end=send_end, compress_render=compress_render, chunk_render=chunk_render)
         else:
             # Automated all the clips - Run through all the cutaway footage
             for clip_name in json_file['CutAwayFootage']:
