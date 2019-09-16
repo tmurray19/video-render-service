@@ -38,13 +38,13 @@ def chunk_driver(json_data, user, send_end=None, compress_render=False, chunk_re
         cutaways.insert(clip_data['Meta'].get('order'), clip)
 
     
-    for item in json_data['Interview']:
+    for item in json_data['InterviewFootage']:
         logging.debug("Iterating through interview footage")
-        clip_data = json_data['Interview'][item]
+        clip_data = json_data['InterviewFootage'][item]
         
         logging.debug(item)
 
-        clip_type = json_data['Interview'][item]['Meta'].get('clipType')
+        clip_type = json_data['InterviewFootage'][item]['Meta'].get('clipType')
 
         
         if clip_type == "Interview":
