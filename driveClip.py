@@ -194,7 +194,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
 
         if json_file['MusicTrackURL'] is not None:
-            
+            generateEffects.new_music(json_file['MusicTrackURL'], int(json_file['MusicAudioLevel']), finished_video.duration) 
                 
 
         # Defining path here is cleaner
