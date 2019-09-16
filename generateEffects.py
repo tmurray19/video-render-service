@@ -63,17 +63,17 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     dur = end - start
 
     
-    # vid_size = (852, 480) if compressed else (1920, 1080)
-
+    blank_type = 'blank_com.png' if compressed else 'blank.png'
+    logging.debug("Blank {}".format(blank_type))
     blank_clip = myp.ImageClip(
-        img=os.path.join(resource_path, 'blank.png'),
+        img=os.path.join(resource_path, blank_type),
         duration=dur
     )
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
     blank_clip.fps = 24
-    blank_clip.set_opacity(1)
+    blank_clip.set_opacity(0)
 
     return blank_clip
 
@@ -102,6 +102,7 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
     clip = clip.volumex(clip_data.get('audioLevel'))
     
     if not compressed:
+        logging.debug("Clip '{}' has been resized".format(clip_data.get('name')))
         clip = clip.resize((1920, 1080)) 
     
     logging.debug("clip '{}' length: {}".format(clip_data.get('name'), round(clip.duration, 2)))

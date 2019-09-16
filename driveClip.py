@@ -132,8 +132,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         
         start_time = time.time()
         print(json_file)
+        logging.debug('Iterating through cutaway footage') 
         for item in json_file['CutAwayFootage']:               
-            logging.debug('Iterating through cutaway footage') 
             clip_data = json_file['CutAwayFootage'][item]
 
             logging.debug(item)
@@ -153,12 +153,13 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 #clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
             else:
                 logging.debug("'{}' is a blank, render transparent image".format(item))
-                clip = generateEffects.generate_blank(clip_data['Meta'])
+                clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)
+        
             cutaways.insert(clip_data['Meta'].get('order'), clip)
-
+        
+        logging.debug("Iterating through interview footage")
         
         for item in json_file['InterviewFootage']:
-            logging.debug("Iterating through interview footage")
             clip_data = json_file['InterviewFootage'][item]
             
             logging.debug(item)
@@ -178,7 +179,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 #clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
             else:
                 logging.debug("'{}' is a blank, render transparent image".format(item))
-                clip = generateEffects.generate_blank(clip_data['Meta'])
+                clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)
+        
             interviews.insert(clip_data['Meta'].get('order'), clip)
 
         logging.debug('Files added in {}s'.format(time.time() - start_time))
