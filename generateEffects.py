@@ -67,13 +67,14 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     logging.debug("Blank {}".format(blank_type))
     blank_clip = myp.ImageClip(
         img=os.path.join(resource_path, blank_type),
-        duration=dur
+        duration=dur,
+        transparent=True
     )
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
     blank_clip.fps = 24
-    blank_clip.set_opacity(0)
+    blank_clip.set_opacity(1)
 
     return blank_clip
 

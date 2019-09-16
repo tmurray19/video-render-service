@@ -42,12 +42,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         # Finished timeline video
         video_list = []
 
-        # Top audio timeline
-        top_audio = []
-
-        # Define current length of video, in terms of the 'main' timeline
-        cutaway_timeline = 0
-
         # Look for the json file in the project folder
         try:
             json_file = sherpaUtils.open_proj(user)
@@ -145,12 +139,12 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
                 # Generate caption data
                 logging.debug("Creating text caption for {}".format(item))
-                #clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
             elif clip_type == "Image":
                 logging.debug("'{}' is an image".format(item))
                 clip = generateEffects.generate_image_clip(clip_data['Meta'], user)
                 logging.debug("Generating text caption for '{}'".format(item))
-                #clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
             else:
                 logging.debug("'{}' is a blank, render transparent image".format(item))
                 clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)
@@ -186,15 +180,10 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         logging.debug('Files added in {}s'.format(time.time() - start_time))
 
         cuts = concatenate_videoclips(cutaways, method="compose")
-        print(cuts.duration)
         ints = concatenate_videoclips(interviews, method="compose")
-        print(ints.duration)
 
         finished_video = CompositeVideoClip([ints, cuts], use_bgclip=True)
-        print(finished_video.duration)
 
-        finished_video.write_videofile('complete.mp4')
-        return
         # We need to insert the intro if it exists
         if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
             intro_clip = generateEffects.create_intro_clip(user, compress_render)
@@ -204,6 +193,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             logging.error("No intro clip found, continuing")
 
 
+        if json_file['MusicTrackURL'] is not None:
+            
                 
 
         # Defining path here is cleaner
