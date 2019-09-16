@@ -7,7 +7,7 @@ import logging
 
 resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH)
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
-
+"""
 positions = {
     1: ("left", "top"),  # Top Left
     2: ("right", "top"),  # Top Right
@@ -19,13 +19,25 @@ positions = {
     8: ("center", "bottom"),  # Center bottom
     9: ("right", "bottom")  # Center right
 }
+"""
+positions = {
+    1: (0.1, 0.1),  # Top Left
+    2: (0.65, 0.1),  # Top Right
+    3: (0.5, 0.1),  # Top Center
+    4: (0.1, 0.5),  # Center Left
+    5: 0.5,  # Center of image
+    6: (0.65, 0.5),  # Center Right
+    7: (0.1, 0.8),  # Bottom Left
+    8: (0.5, 0.8),  # Bottom Center
+    9: (0.65, 0.8)  # Bottom Right
+}
 
 sizes = {
-    "Small": 12,
-    "Medium": 20,
+    "Small": 20,
+    "Medium": 40,
     "Large": 80,
     "X-Large": 160,
-    "XX-Large": 400
+    "XX-Large": 240
 }
 
 music_list = {
@@ -74,7 +86,6 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
     blank_clip.fps = 24
-    blank_clip.set_opacity(1)
 
     return blank_clip
 
