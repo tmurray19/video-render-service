@@ -20,24 +20,50 @@ positions = {
     9: ("right", "bottom")  # Center right
 }
 """
-positions = {
-    1: (0.1, 0.1),  # Top Left
-    2: (0.65, 0.1),  # Top Right
-    3: (0.5, 0.1),  # Top Center
-    4: (0.1, 0.5),  # Center Left
-    5: 0.5,  # Center of image
-    6: (0.65, 0.5),  # Center Right
-    7: (0.1, 0.8),  # Bottom Left
-    8: (0.5, 0.8),  # Bottom Center
-    9: (0.65, 0.8)  # Bottom Right
+positions_small = {
+    1: (0.08, 0.1),  # Top Left
+    2: (0.75, 0.1),  # Top Right
+    3: (0.45, 0.1),  # Top Center
+    4: (0.08, 0.5),  # Center Left
+    5: (0.475, 0.5),  # Center of image
+    6: (0.8, 0.5),  # Center Right
+    7: (0.08, 0.8),  # Bottom Left
+    8: (0.45, 0.8),  # Bottom Center
+    9: (0.75, 0.8)  # Bottom Right
 }
 
+positions_medium = {
+    1: (0.03, 0.01),  # Top Left
+    2: (0.3, 0.01),  # Top Right
+    3: (0.5, 0.01),  # Top Center
+    4: (0.03, 0.45),  # Center Left
+    5: (0.3, 0.45),  # Center of image
+    6: (0.5, 0.45),  # Center Right
+    7: (0.03, 0.75),  # Bottom Left
+    8: (0.3, 0.75),  # Bottom Center
+    9: (0.5, 0.75)  # Bottom Right
+}
+
+positions_large = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.4, 0.01),  # Top Right
+    3: (0.25, 0.01),  # Top Center
+    4: (0.02, 0.4),  # Center Left
+    5: (0.25, 0.4),  # Center of image
+    6: (0.4, 0.4),  # Center Right
+    7: (0.02, 0.75),  # Bottom Left
+    8: (0.25, 0.75),  # Bottom Center
+    9: (0.4, 0.75)  # Bottom Right
+}
+
+
+
 sizes = {
-    "Small": 20,
-    "Medium": 40,
+    "Small": 30,
+    "Medium": 50,
     "Large": 80,
     "X-Large": 160,
-    "XX-Large": 240
+    "XX-Large": 220
 }
 
 music_list = {
@@ -221,11 +247,11 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
 
     (Code should first try to look)
     """
-    try:    
+    try:
         caption_data = edit_data['Caption']
-
-        font_size = sizes[caption_data.get('fontSize')]/2 if compressed else sizes[caption_data.get('fontSize')]
-        logging.debug("Font size is {}, converted to {}".format(caption_data.get('fontSize'), font_size))
+        font_from_json = caption_data.get('fontSize')
+        font_size = round(sizes[font_from_json] * 0.44357) if compressed else sizes[font_from_json]
+        logging.debug("Font size is {}, converted to {}".format(font_from_json, font_size))
     
         # TODO: Change
         dur = max(1, clip.duration - 2)
@@ -239,10 +265,25 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             color=caption_data.get('fontColour'),
         )
 
-        text_caption = text_caption.set_position(
-            positions[caption_data.get('screenPos')], 
-            relative=True
-            ).set_duration(dur)
+
+        if font_from_json == "XX-Large":
+            print(positions_large[caption_data.get('screenPos')])
+            text_caption = text_caption.set_position(
+                positions_large[caption_data.get('screenPos')], 
+                relative=True
+                ).set_duration(dur)        
+        elif font_from_json == "Small" or font_from_json == "Medium":
+            print(positions_small[caption_data.get('screenPos')])
+            text_caption = text_caption.set_position(
+                positions_small[caption_data.get('screenPos')], 
+                relative=True
+                ).set_duration(dur)
+        elif font_from_json == "Large" or font_from_json == "X-Large":
+            print(positions_medium[caption_data.get('screenPos')])
+            text_caption = text_caption.set_position(
+                positions_medium[caption_data.get('screenPos')], 
+                relative=True
+                ).set_duration(dur)
 
         text_caption.fps = 24
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
