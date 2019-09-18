@@ -471,9 +471,10 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     if send_end is not None:
                         send_end.send(results)            
                     return results
-
-            
             results = "Video Rendered Successfully", 1
+            logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
+            logging.debug("Completed in {} seconds".format(time.time() - start_time))
+            logging.debug("Closing render instance - Chunk")            
             if send_end is not None:
                 send_end.send(results)            
             return results
@@ -491,6 +492,9 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     fps=24
                 )        
                 results = "Video Rendered Successfully", 1
+                logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
+                logging.debug("Completed in {} seconds".format(time.time() - start_time))
+                logging.debug("Closing render instance - Compress")
                 if send_end is not None:
                     send_end.send(results)            
                 return results
@@ -515,6 +519,9 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     fps=24
                 )        
                 results = "Video Rendered Successfully", 1
+                logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
+                logging.debug("Completed in {} seconds".format(time.time() - start_time))
+                logging.debug("Closing render instance - Full")
                 if send_end is not None:
                     send_end.send(results)            
                 return results
@@ -528,9 +535,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     send_end.send(results)            
                 return results                
 
-        logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
-        logging.debug("Completed in {} seconds".format(time.time() - start_time))
-        logging.debug("Closing render instance")
     except:
         logging.error("An unknown error has occured, causing video render instance to crash:")
         logging.exception("")
