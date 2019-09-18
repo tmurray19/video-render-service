@@ -55,16 +55,18 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             logging.error("File or folder cannot be found")
             logging.error(e)
             results = "Render exited without error [Unable to find file or folder]", 0        
-            send_end.send(results)
-            return
+            if send_end is not None:
+                send_end.send(results)
+            return results
 
 
         # If a file can be found, but no edit data exists in the file
         if not json_file['CutAwayFootage'] and not json_file['InterviewFootage']:
             logging.error("This project seems to have no edit data recorded. Exiting render session")
             results = "Render exited without error [No edit data exists in JSON]", 0        
-            send_end.send(results)
-            return
+            if send_end is not None:
+                send_end.send(results)            
+            return results
 
 
         # Get timeline lengths
@@ -395,8 +397,10 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         fps=24
                     )
                     results = "Video Rendered Successfully", 1
-                    send_end.send(results)
-                    return
+                    if send_end is not None:
+                        send_end.send(results)            
+                    return results
+
             logging.debug("Running chunk render instance")
             # Get 10 second chunks of videos
             logging.debug("Splitting video up into 10s chunks.")
@@ -450,19 +454,25 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         remove_temp=True,
                         fps=24
                     )
-                    results = "Video Rendered Successfully", 1
-                    send_end.send(results)
+                    results = "Chunk {} Rendered Successfully".format(str(preview_chunks.index(video))), 1
+                    if send_end is not None:
+                        send_end.send(results)            
+                    return results
                 except:
                     logging.error("Fatal error occured while writing video - Chunk Render")
                     logging.exception("")
                     logging.error("Exiting program without writing video file correctly")                
                     results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
-                    send_end.send(results)
-                    return
+                    if send_end is not None:
+                        send_end.send(results)            
+                    return results
+
             
             results = "Video Rendered Successfully", 1
-            send_end.send(results)
-            return
+            if send_end is not None:
+                send_end.send(results)            
+            return results
+
                 
         if compress_render:
             logging.debug("Running compress render instance")
@@ -476,14 +486,17 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     fps=24
                 )        
                 results = "Video Rendered Successfully", 1
-                send_end.send(results)
+                if send_end is not None:
+                    send_end.send(results)            
+                return results
             except:
                 logging.error("Fatal error occured while writing video - Compressed Render")
                 logging.exception("")
                 logging.error("Exiting program without writing video file correctly")
                 results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
-                send_end.send(results)
-                return        
+                if send_end is not None:
+                    send_end.send(results)            
+                return results
         else:
             logging.debug("Running full render instance")
             try:
@@ -497,15 +510,18 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     fps=24
                 )        
                 results = "Video Rendered Successfully", 1
-                send_end.send(results)
+                if send_end is not None:
+                    send_end.send(results)            
+                return results
 
             except:
                 logging.error("Fatal error occured while writing video - Full Render")
                 logging.exception("")
                 logging.error("Exiting program without writing video file correctly")
                 results = "Video not rendered [ERROR OCCURED, VIEW LOGS '{}' FOR MORE DETAILS]".format(log_name), 99
-                send_end.send(results)
-                return
+                if send_end is not None:
+                    send_end.send(results)            
+                return results                
 
         logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
         logging.debug("Completed in {} seconds".format(time.time() - start_time))
@@ -514,5 +530,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         logging.error("An unknown error has occured, causing video render instance to crash:")
         logging.exception("")
         results = "Unforseen error has occured [Contact admin]", 99      
-        send_end.send(results)
-        return
+        if send_end is not None:
+            send_end.send(results)            
+        return results

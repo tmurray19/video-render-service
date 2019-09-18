@@ -9,6 +9,7 @@ from multiprocessing import Process, Pipe
 from datetime import datetime
 import logging
 import sys
+import warnings
 
 class Watcher:
     DIRECTORY_TO_WATCH = os.path.join(Config.BASE_DIR, Config.QUEUE_LOCATION)
@@ -104,6 +105,8 @@ class Handler(FileSystemEventHandler):
 
 
 if __name__ == '__main__':
+
+    warnings.filterwarnings('ignore')
 
     log_file_name = os.path.join(
         Config.BASE_DIR,
