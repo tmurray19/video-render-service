@@ -168,10 +168,11 @@ def get_chunk(json_data, user, chunk_number, send_end=None):
             json_data['CutAwayFootage'][clip]['Meta']['fullContextEnd'] = full_context_end
             full_context_start = full_context_end
         #print("After")
-        #print(json_data['CutAwayFootage'])
+        print(json_data['CutAwayFootage'])
         video_list = []
         top_audio = []
         cutaway_timeline = 0
+        print("Clips ready in: ", time.time() - start_time_count)
         for clip_name in json_data['CutAwayFootage']:
             logging.debug(clip_name + ":")
             logging.debug("Cutaway Timeline: {}".format(cutaway_timeline))
@@ -182,7 +183,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None):
             clip_type = clip_data['Meta'].get('clipType')
 
             # If its a cutaway, just generate the clip and add a caption if it exists
-            if clip_type == "CutAway":
+            if clip_type == "CutAway" or clip_type == "Interview":
                 logging.debug(clip_name + " is a cutaway.")
                 clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=True)
                 # Generate caption data
