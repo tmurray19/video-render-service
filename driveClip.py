@@ -85,6 +85,13 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         # While the smallest timeline is the cut away timeline
         # TODO: THIS ISSUE MAY ONLY OCCUR IF THE CUTAWAY TIMELINE IS SHORTER THAN THE TOP TIMELINE
         while smallest_timeline == 'CutAwayFootage':
+            if blank_no > 100:
+                logging.debug("There's something wrong with the blank placement for {}. Terminating project".format(user))            
+                results = "Fatal error, blank placement is in infinite loop", 99        
+                if send_end is not None:
+                    send_end.send(results)
+                return results
+
             # Calculate the length of the blank that should be playing at the smallest timeline 
             current_interview_clip = sherpaUtils.current_interview_footage(
                 json_file, 
@@ -316,7 +323,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             video_list.insert(clip_data['Meta'].get('order')-1, clip)
 
         # Video list
-
         logging.debug("Video list:")
         logging.debug(video_list)
 
@@ -325,7 +331,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
         # We need to insert the intro if it exists
         if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
-            intro_clip = generateEffects.create_intro_clip(user, compress_render)
+            intro_clip = generateEffects.create_intro_clip(user, compressed=compress_render or chunk_render)
             video_list.insert(0, intro_clip)
             logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(intro_clip, intro_clip.audio, intro_clip.duration))
             top_audio.insert(0, intro_clip.audio)
@@ -457,7 +463,6 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     results = "Chunk {} Rendered Successfully".format(str(preview_chunks.index(video))), 1
                     if send_end is not None:
                         send_end.send(results)            
-                    return results
                 except:
                     logging.error("Fatal error occured while writing video - Chunk Render")
                     logging.exception("")
@@ -533,3 +538,5 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         if send_end is not None:
             send_end.send(results)            
         return results
+
+render_video("2300", chunk_render=True)
