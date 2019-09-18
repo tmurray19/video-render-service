@@ -267,19 +267,16 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
 
 
         if font_from_json == "XX-Large":
-            print(positions_large[caption_data.get('screenPos')])
             text_caption = text_caption.set_position(
                 positions_large[caption_data.get('screenPos')], 
                 relative=True
                 ).set_duration(dur)        
         elif font_from_json == "Small" or font_from_json == "Medium":
-            print(positions_small[caption_data.get('screenPos')])
             text_caption = text_caption.set_position(
                 positions_small[caption_data.get('screenPos')], 
                 relative=True
                 ).set_duration(dur)
         elif font_from_json == "Large" or font_from_json == "X-Large":
-            print(positions_medium[caption_data.get('screenPos')])
             text_caption = text_caption.set_position(
                 positions_medium[caption_data.get('screenPos')], 
                 relative=True
