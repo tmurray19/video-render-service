@@ -115,3 +115,16 @@ def give_clip_order(clip_order, json_data):
         if json_data[item]['Meta'].get('order') == clip_order:
             return json_data[item]
             
+
+def get_clip_at_time(time, json_data):
+    """
+    JSON data needs to be either cutaway or interview
+    """
+    #print("TIME TO REPLACE ", time)
+    run_time = 0
+    for item in json_data:
+        #print("RUN TIME ", run_time)
+        #print(json_data[item]['Meta'])
+        if json_data[item]['Meta'].get('fullContextEnd') >= time:
+            return json_data[item]
+        run_time += calculate_clip_length(json_data[item]['Meta'])
