@@ -49,6 +49,7 @@ class Handler(FileSystemEventHandler):
         # Windows is created
         # Linux is modified
         elif event.event_type == 'modified':
+            logging.debug('-------------------------------------------------------------------')
             time.sleep(1)
             recv_end, send_end = Pipe(False)
             # Take any action here when a file is first created.

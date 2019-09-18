@@ -132,14 +132,25 @@ def generate_image_clip(clip_data, user):
     """'name' in this case refers to related file name of image"""
     # TODO
 
-    image_clip = myp.ImageClip(
-        img=os.path.join(attach_dir, user)+clip_data.get('name'),
-        duration=clip_data.get('duration')
-    )
+    dur = clip_data.get('duration')
+
+    if dur is None:
+        dur = clip_data.get('endTime') - clip_data.get('startTime')
+
+    try:
+        image_clip = myp.ImageClip(
+            img=os.path.join(attach_dir, user, clip_data.get('name')+".jpg"),
+            duration=dur
+        )
+    except FileNotFoundError:
+        image_clip = myp.ImageClip(
+            img=os.path.join(attach_dir, user, clip_data.get('name')+".png"),
+            duration=dur
+        )        
 
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
-    image_clip = image_clip.set_audio(audio.set_duration(clip_data.get('duration')))
+    image_clip = image_clip.set_audio(audio.set_duration(dur))
     image_clip.fps = 24
 
     logging.debug("Image clip successfully generated.")
@@ -244,28 +255,56 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         
 
 
-def open_music(music_data, dur):
+def open_music(music_data, audio_lvl, dur):
     """
-    music_choice: string --> Which music file to open
-    dur: int --> The duration of the video
+    music_choice: string --> Which music file to open - Gonna be url, need to strip
+    audio_lvl: int --> lenght of 
 
     For opening the music clip
     """
     try:
-        music = myp.AudioFileClip(os.path.join(resource_path, music_list[music_data.get("choice")]))
-        music = music.fx(volumex, music_data.get("audioLevel"))
-        music = music.set_duration(dur)
+        file_name = music_data.split('/')[-1]
+        music_location = os.path.join(resource_path, file_name)
+
+
+        music = myp.AudioFileClip(music_location)
+        music = volumex(music, audio_lvl)
+        if music.duration > dur:
+            music = music.set_duration(dur)
 
         # TODO: 2 second fade in and out automatically added
         music = music.audio_fadein(2)
         music = music.audio_fadeout(2)
 
-        logging.debug("Music file '{}' chosen for video, cropped to {}s in length".format(music_list[music_data.get("choice")], dur))
+        logging.debug("Music file '{}' chosen for video, cropped to {}s in length".format(file_name, dur))
         return music
 
     except Exception as e:
         logging.error("Exception occured during open_music: {}".format(e))
         return 0
+
+
+def open_voice(music_data, audio_lvl, proj_id):
+    """
+    music_choice: string --> Which music file to open - Gonna be url, need to strip
+    audio_lvl: int --> lenght of 
+
+    For opening the music clip
+    """
+    try:
+        file_name = music_data.split('/')[-1]
+        voice_location = os.path.join(attach_dir, proj_id, file_name)
+
+        voice = myp.AudioFileClip(voice_location)
+        voice = volumex(voice, audio_lvl)
+
+        logging.debug("Voice file '{}' chosen for video".format(file_name))
+        return voice
+
+    except Exception as e:
+        logging.error("Exception occured during open_music: {}".format(e))
+        return 0
+
 
 def create_intro_clip(proj_id, compressed):
     logging.debug("Adding intro clip")    

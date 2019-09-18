@@ -98,6 +98,8 @@ def calculate_time_at_clip(clip_data, clip_timeline_data, timeline_len=None):
             runtime += clip_time
 
     if timeline_len is not None:
+        if (round((runtime - timeline_len), 2)) < 0.1:
+            return (round((runtime - timeline_len)+0.1, 2))
         return round((runtime - timeline_len), 2)
     return round(runtime, 2)
 

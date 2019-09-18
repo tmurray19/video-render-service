@@ -77,8 +77,15 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
 
         # Find the smallest timeline length
         smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
-        
+
         if smallest_timeline == "CutAwayFootage":
+            if not json_file['CutAwayFootage']:
+                logging.debug("Cutaways is empty, making interview line the new cutaway line")
+                json_file['CutAwayFootage'] = json_file['InterviewFootage']
+                json_file['InterviewFootage'] = dict()
+                cutaway_timeline_length = round(sherpaUtils.calculate_timeline_length(json_file['CutAwayFootage']), 2)
+                interview_timeline_length = round(sherpaUtils.calculate_timeline_length(json_file['InterviewFootage']), 2)        
+                smallest_timeline = sherpaUtils.order_picker(cutaway_timeline_length, interview_timeline_length)
             logging.debug("Smallest timeline is currently the Cut Away Timeline, correcting timelines as necessary")
             blank_no = 1
 
@@ -148,7 +155,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
             clip_type = clip_data['Meta'].get('clipType')
 
             # If its a cutaway, just generate the clip and add a caption if it exists
-            if clip_type == "CutAway":
+            if clip_type == "CutAway" or clip_type == "Interview":
                 logging.debug(clip_name + " is a cutaway.")
                 clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
                 # Generate caption data
@@ -350,15 +357,29 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         # Try adding the music if it exists
         logging.debug("Attempting to add music...")
         try:
-            music_data = json_file['Music']
-            music = generateEffects.open_music(music_data, cutaway_timeline)
+            music_data = json_file['MusicTrackURL']
+            music_audio_lvl = float(json_file['MusicAudioLevel'])
+            music = generateEffects.open_music(music_data, music_audio_lvl, cutaway_timeline)
             # If the video is longer than the music, replay it
             if music.duration > cutaway_timeline:
-                music = CompositeAudioClip([music, generateEffects.open_music(music_data, cutaway_timeline - music.duration)])
+                music = CompositeAudioClip([music, generateEffects.open_music(music_data, music_audio_lvl, cutaway_timeline - music.duration)])
             top_audio = CompositeAudioClip([top_audio, music])
             logging.debug("Music added successfully")
         except Exception as e:
             logging.debug("Exception occured in render - during music audio building:")
+            logging.debug(e)
+            finished_audio = top_audio
+
+        # Try adding the voice over 
+        logging.debug("Attempting to add voice over...")
+        try:
+            voice_data = json_file['VoiceTrackURL']
+            voice_audio_lvl = float(json_file['VoiceoverAudioLevel'])
+            voice = generateEffects.open_voice(voice_data, voice_audio_lvl, user)
+            top_audio = CompositeAudioClip([top_audio, voice])
+            logging.debug("Music added successfully")
+        except Exception as e:
+            logging.debug("Exception occured in render - during voiceover audio building:")
             logging.debug(e)
             finished_audio = top_audio
 
@@ -405,7 +426,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         remove_temp=True,
                         fps=24
                     )
-                    results = "Video Rendered Successfully", 1
+                    results = "Chunk Rendered Successfully", 1
                     if send_end is not None:
                         send_end.send(results)            
                     return results
@@ -435,7 +456,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                 logging.debug("Segment {} is {}s long".format(i, round(preview_clip.duration, 2)))
                 preview_clip.fps = 24
                 if preview_clip.duration < chunk_len/2:
-                    logging.debug("Clip is smaller than {}s, so appending it to last clip instead.")
+                    logging.debug("Clip is smaller than {}s, so appending it to last clip instead.".format(chunk_len/2))
                     preview_clip = concatenate_videoclips([preview_clip, preview_chunks[-1]])
                     del preview_chunks[-1]
                 preview_chunks.append(preview_clip)
@@ -545,5 +566,3 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         if send_end is not None:
             send_end.send(results)            
         return results
-
-render_video("2300", chunk_render=True)
