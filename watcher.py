@@ -115,7 +115,7 @@ if __name__ == '__main__':
         Config.BASE_DIR,
         Config.LOGS_LOCATION,
         Config.WATCHER_LOGS, 
-        datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_watcher_instance.log"
+        datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_watcher_instance_TESTING.log"
     )
 
     logging.basicConfig(
@@ -126,6 +126,6 @@ if __name__ == '__main__':
     )
 
     logging.debug("Beginning watcher service")
-
+    logging.debug("THIS WATCHER HAS BEEN IMPLEMENTED FOR TESTING PURPOSE")
     w = Watcher()
     w.run()
