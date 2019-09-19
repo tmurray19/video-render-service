@@ -327,7 +327,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
         
         for video in preview_chunks:
             try:
-                vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
+                vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_TESTING_edited.mp4"
                 vid_dir = os.path.join(attach_dir, user, vid_name)
 
                 logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time)))
@@ -354,7 +354,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
                 return results
         #results = "Video Rendered Successfully", 1
         logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
-        logging.debug("Completed in {} seconds".format(time.time() - start_time))
+        logging.debug("Completed in {} seconds".format(time.time() - start_time_count))
         logging.debug("Closing render instance - Chunk")            
         if send_end is not None:
             send_end.send(results)            
