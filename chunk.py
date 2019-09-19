@@ -283,7 +283,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
 
 
     # Defining path here is cleaner      
-    vid_name = user + "_com_preview_edited_TESTING.mp4"
+    vid_name = user + "_com_chunk_edited_TESTING.mp4"
     vid_dir = os.path.join(attach_dir, user, vid_name)
 
 
@@ -353,7 +353,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
                     send_end.send(results)            
                 return results
         #results = "Video Rendered Successfully", 1
-        logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
+        logging.debug("All chunks rendered to {}".format(vid_dir))
         logging.debug("Completed in {} seconds".format(time.time() - start_time_count))
         logging.debug("Closing render instance - Chunk")            
         if send_end is not None:
@@ -376,6 +376,11 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
         )        
         print(("Done in {} seconds".format(time.time() - start_time_count)))
         logging.debug("Done in {} seconds".format(time.time() - start_time_count))
+        logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
+        logging.debug("Closing render instance - Chunk")            
+        results = "Chunk {} Rendered Successfully".format(chunk_number), 1
+        if send_end is not None:
+            send_end.send(results)            
+        return results
 
 
-get_chunk(sherpaUtils.open_proj("2312"), "2312", 1)

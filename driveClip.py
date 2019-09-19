@@ -16,6 +16,8 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
     compress_render: Bool -> Set to true if you want this function to return a quick render
     """
     try:
+        if chunk_render:
+            chunk.get_chunk(sherpaUtils.open_proj(user), user, 1)
         log_name = datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_render_service_instance_id_{}.log".format(user)
 
         # Collecting garbage to clear out memory
@@ -485,6 +487,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         fps=24
                     )
                     results = "Chunk {} Rendered Successfully".format(str(preview_chunks.index(video))), 1
+                    results = "Chunk 1 Rendered Successfully", 1
                     if send_end is not None:
                         send_end.send(results)            
                 except:
@@ -495,7 +498,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                     if send_end is not None:
                         send_end.send(results)            
                     return results
-            results = "Video Rendered Successfully", 1
+            #results = "Video Rendered Successfully", 1
             logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
             logging.debug("Completed in {} seconds".format(time.time() - start_time))
             logging.debug("Closing render instance - Chunk")            
@@ -566,3 +569,5 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         if send_end is not None:
             send_end.send(results)            
         return results
+
+render_video("2312", chunk_render=True)
