@@ -330,7 +330,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
                 vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_TESTING_edited.mp4"
                 vid_dir = os.path.join(attach_dir, user, vid_name)
 
-                logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time)))
+                logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time_count)))
                 video.write_videofile(
                     vid_dir,
                     threads=8,
