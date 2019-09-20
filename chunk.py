@@ -67,11 +67,11 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
         )[0]
 
         # Calculate when the clip om the interview timeline should be playing (globally), and returns the length that the blank clip should be
-        blank_len = sherpaUtils.calculate_time_at_clip(
+        blank_len = round(sherpaUtils.calculate_time_at_clip(
             current_interview_clip['Meta'], 
             json_data['InterviewFootage'], 
             timeline_len=cutaway_timeline_length
-        )
+        ), 2)
 
         # Creating a blank clip to insert into time
         blank_name = "end_of_line_blank_" + str(blank_no)
@@ -217,13 +217,20 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
 
         # If it's a blank
         elif clip_type == "Blank" or clip_type == "CustomBlank":
-            pass
-        
+            logging.debug(clip_name + " is a Blank.")
+            clip = generateEffects.generate_blank(clip_data['Meta'])            
+            logging.debug("Generating audio for {}".format(clip_name))
+            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=True)
+            logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
+            top_audio.append(clip.audio)
+
         # Insert clip into correct position in array
         logging.debug("Inserted clip '{}' into pos {}.".format(clip_name, clip_data['Meta'].get('order')-1))
 
         cutaway_timeline = round((cutaway_timeline+clip.duration), 2)
         video_list.append(clip)
+    
+    logging.debug("Final Cutaway Timeline: {}".format(cutaway_timeline))
 
     # Video list
     logging.debug("Video list:")
