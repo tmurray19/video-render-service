@@ -12,7 +12,7 @@ from datetime import datetime
 import logging
 import sys
 import warnings
-import chunk
+import chunk_render
 
 class Watcher:
     DIRECTORY_TO_WATCH = os.path.join(Config.BASE_DIR, Config.QUEUE_LOCATION)
@@ -79,7 +79,7 @@ class Handler(FileSystemEventHandler):
                 compress = True if rend_type == "preview" else False
                 chunk = True if rend_type == "chunk" else False
                 logging.debug("Compress status: {}, Chunk status: {}".format(compress, chunk))
-                p = Process(target=chunk.get_chunk, args=(proj_id, send_end, compress, chunk,))
+                p = Process(target=chunk_render.get_chunk, args=(proj_id, send_end, compress, chunk,))
                 p.start()
                 p.join()
                 render_return =  recv_end.recv()
