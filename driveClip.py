@@ -485,6 +485,7 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
                         fps=24
                     )
                     results = "Chunk {} Rendered Successfully".format(str(preview_chunks.index(video))), 1
+                    results = "Chunk 1 Rendered Successfully", 1
                     if send_end is not None:
                         send_end.send(results)            
                 except:
