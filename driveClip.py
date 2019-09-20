@@ -570,5 +570,3 @@ def render_video(user, send_end=None, compress_render=False, chunk_render=False)
         if send_end is not None:
             send_end.send(results)            
         return results
-
-render_video("1149", chunk_render=True)
