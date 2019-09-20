@@ -2,7 +2,7 @@ from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatena
 from config import Config
 from datetime import datetime
 from math import ceil
-import generateEffects, sherpaUtils, os, time, logging, gc
+import generateEffects, sherpaUtils, os, time, logging, gc, copy
 
 
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
@@ -123,7 +123,6 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
 
     if blank_replace:    
         #blank replacement
-        run_time = 0
         full_context_start = 0
         for clip in json_data['CutAwayFootage']:
             full_context_end = round(full_context_start + sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][clip]['Meta']), 2)
@@ -132,32 +131,49 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
             full_context_start = full_context_end
         
         full_context_start = 0
-
         for clip in json_data['InterviewFootage']:
             full_context_end = round(full_context_start + sherpaUtils.calculate_clip_length(json_data['InterviewFootage'][clip]['Meta']), 2)
             json_data['InterviewFootage'][clip]['Meta']['fullContextStart'] = full_context_start
             json_data['InterviewFootage'][clip]['Meta']['fullContextEnd'] = full_context_end
             full_context_start = full_context_end
-
-        for clip in json_data['CutAwayFootage']:
+        
+        print(json_data)
+        
+        cp = copy.deepcopy(json_data['CutAwayFootage'])
+        
+        for clip in cp:
+            # If there's any blank, clean the whole thing up
             if json_data['CutAwayFootage'][clip]['Meta'].get('clipType') == "Blank":
-                blank_start = json_data['CutAwayFootage'][clip]['Meta'].get("startTime") + run_time
-                blank_end = blank_start + sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][clip]['Meta'])
+                if not json_data['CutAwayFootage'][clip]['edit']:
+                    blank_start = json_data['CutAwayFootage'][clip]['Meta']['fullContextStart']
+                    blank_end = json_data['CutAwayFootage'][clip]['Meta']['fullContextEnd']
 
-                #print("BLANK START " , blank_start)
-                #print("BLANK END ", blank_end)
+                    print("BLANK START " , blank_start)
+                    print("BLANK END ", blank_end)
 
-                interview_clip = sherpaUtils.get_clip_at_time(blank_end, json_data['InterviewFootage'])
-                if sherpaUtils.calculate_clip_length(interview_clip['Meta']) > sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][clip]['Meta']):
-                    interview_clip['Meta']['endTime'] = interview_clip['Meta']['startTime'] + sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][clip]['Meta'])
-                json_data['CutAwayFootage'][clip] = interview_clip
+                    interview_clip = sherpaUtils.blank_json_replace(blank_start, blank_end, json_data, json_data['CutAwayFootage'][clip])
+
+                    if isinstance(interview_clip, list):
+                        # Update all the orders from the blank onwards
+                        #amnt = (len(interview_clip) - 1)
+                        #json_data['CutAwayFootage'] = sherpaUtils.update_order(json_data['CutAwayFootage'], json_data['CutAwayFootage'][clip]['Meta']['order'], amnt)
+                        print(interview_clip[0])
+                        json_data['CutAwayFootage'][clip] = interview_clip[0]
+                        interview_clip.pop(0)
+                        pos = 0
+                        count = 9999
+                        for _item in interview_clip:
+                            clip_name = str(count)
+                            json_data['CutAwayFootage'][clip_name] = interview_clip[pos]
+                            pos+=1
+                            count+=1
+                    else:
+                        json_data['CutAwayFootage'][clip] = interview_clip
             
-
-            run_time += sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][clip]['Meta'])
-
-        #print("Before")
-        #print(json_data['CutAwayFootage'])
-        full_context_start = 0
+    #print("Before")
+    print(json_data)
+    full_context_start = 0
+    full_context_end = 0
     for clip in json_data['CutAwayFootage']:
         full_context_end = round(full_context_start + sherpaUtils.calculate_clip_length(json_data['CutAwayFootage'][clip]['Meta']), 2)
         #print("START: ", full_context_start)
@@ -166,7 +182,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
         json_data['CutAwayFootage'][clip]['Meta']['fullContextEnd'] = full_context_end
         full_context_start = full_context_end
     #print("After")
-    print(json_data['CutAwayFootage'])
+    print(json_data)
     video_list = []
     top_audio = []
     cutaway_timeline = 0
@@ -200,7 +216,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
             top_audio.append(clip.audio)
 
         # If it's a blank
-        elif clip_type == "Blank":
+        elif clip_type == "Blank" or clip_type == "CustomBlank":
             pass
         
         # Insert clip into correct position in array
@@ -353,6 +369,7 @@ def get_chunk(json_data, user, chunk_number, send_end=None, all_clips=True):
                     send_end.send(results)            
                 return results
         #results = "Video Rendered Successfully", 1
+
         logging.debug("All chunks rendered to {}".format(vid_dir))
         logging.debug("Completed in {} seconds".format(time.time() - start_time_count))
         logging.debug("Closing render instance - Chunk")            
