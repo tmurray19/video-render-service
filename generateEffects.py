@@ -103,11 +103,14 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     
     vid_size = (852, 480) if compressed else (1920, 1080)
 
+    """    
     blank_clip = myp.ColorClip(
         size=vid_size,
         color=(0, 0, 0),
         duration=dur
-    )
+    )"""
+
+    blank_clip = myp.VideoFileClip(os.path.join(resource_path, "blank.mp4"))
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
