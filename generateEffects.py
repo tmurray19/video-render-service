@@ -114,6 +114,7 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
         os.path.join(resource_path, "blank.mp4")
         )
     blank_clip = blank_clip.subclip(start, end)
+    blank_clip = blank_clip.resize(vid_size)
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
