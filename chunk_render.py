@@ -220,7 +220,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
         # If it's a blank
         elif clip_type == "Blank" or clip_type == "CustomBlank":
             logging.debug(clip_name + " is a Blank.")
-            clip = generateEffects.generate_blank(clip_data['Meta'])            
+            clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)
             logging.debug("Generating audio for {}".format(clip_name))
             clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
             logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
