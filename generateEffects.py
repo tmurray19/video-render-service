@@ -26,10 +26,10 @@ positions_small = {
     3: (0.45, 0.1),  # Top Center
     4: (0.08, 0.5),  # Center Left
     5: ('center','center'),  # Center of image
-    6: (0.8, 0.5),  # Center Right
-    7: (0.08, 0.8),  # Bottom Left
-    8: (0.45, 0.8),  # Bottom Center
-    9: (0.75, 0.8)  # Bottom Right
+    6: (0.75, 0.5),  # Center Right
+    7: (0.08, 0.7),  # Bottom Left
+    8: (0.45, 0.7),  # Bottom Center
+    9: (0.75, 0.7)  # Bottom Right
 }
 
 positions_medium = {
@@ -375,6 +375,25 @@ def create_intro_clip(proj_id, compressed):
     intro_clip = intro_clip.set_audio(intro_audio.set_duration(intro_clip.duration))
     return intro_clip
 
+
+def generate_intro(clip, compressed, transparent=False):
+    logging.debug("Adding intro")
+    # We need to handle audio here for composite clips
+    if transparent is True:
+        logging.debug("Intro is transparent, need to composite clip on top of intro clip")
+        
+        # Generate intro clip
+        intro = None
+        # Composite both clips
+        intro_composite = myp.CompositeVideoClip(clip, intro)
+        intro_composite = intro_composite.set_audio(clip.audio)
+        return intro_composite, True 
+    else:
+        logging.debug("We can just append this to the start of the video instead")
+        intro = None
+        intro_audio = myp.AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
+        intro = intro.set_audio(intro_audio)
+        return intro, False
 
 def get_blank_audio(clip_data):
     """

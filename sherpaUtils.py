@@ -278,9 +278,10 @@ def split_text(caption):
     caption = list(caption)
     left, right = ''.join(caption[:len(caption)//2]), ''.join(caption[len(caption)//2:])
 
-    left_val = left.find(' ')
+    left_val = left.rfind(' ')
     right_val = right.find(' ')
-    
+    print(left_val + len(caption)//2)
+    print(right_val + len(caption)//2)
 
     caption.insert((min(left_val+len(caption)//2, right_val+len(caption)//2)), '\n')
 
