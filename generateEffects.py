@@ -25,7 +25,7 @@ positions_small = {
     2: (0.75, 0.1),  # Top Right
     3: (0.45, 0.1),  # Top Center
     4: (0.08, 0.5),  # Center Left
-    5: (0.475, 0.5),  # Center of image
+    5: ('center','center'),  # Center of image
     6: (0.8, 0.5),  # Center Right
     7: (0.08, 0.8),  # Bottom Left
     8: (0.45, 0.8),  # Bottom Center
@@ -37,7 +37,7 @@ positions_medium = {
     2: (0.3, 0.01),  # Top Right
     3: (0.5, 0.01),  # Top Center
     4: (0.03, 0.45),  # Center Left
-    5: (0.3, 0.45),  # Center of image
+    5: ('center','center'),  # Center of image
     6: (0.5, 0.45),  # Center Right
     7: (0.03, 0.75),  # Bottom Left
     8: (0.3, 0.75),  # Bottom Center
@@ -49,7 +49,7 @@ positions_large = {
     2: (0.4, 0.01),  # Top Right
     3: (0.25, 0.01),  # Top Center
     4: (0.02, 0.4),  # Center Left
-    5: (0.25, 0.4),  # Center of image
+    5: ('center','center'),  # Center of image
     6: (0.4, 0.4),  # Center Right
     7: (0.02, 0.75),  # Bottom Left
     8: (0.25, 0.75),  # Bottom Center
@@ -258,16 +258,30 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         font_size = round(sizes[font_from_json] * 0.44357) if compressed else sizes[font_from_json]
         logging.debug("Font size is {}, converted to {}".format(font_from_json, font_size))
     
+        caption_text = caption_data.get('text')
+
         # TODO: Change
         dur = max(1, clip.duration - 2)
         logging.debug("Duration of text clip is {}".format(dur))
     
+        if font_from_json != 'XX-Large' or font_from_json != 'X-Large':
+            if len(caption_text) > 18:
+                try:
+                    caption_text = sherpaUtils.split_text(caption_text)
+                except:
+                    logging.error("Caption data could not be split safely")
+                    logging.exception('')
+        
+        print(caption_text)
+
         # Define Text Data
         text_caption = myp.TextClip(
-            txt=caption_data.get('text'),
+            txt=caption_text,
             fontsize=font_size,
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
+            method='caption',
+            size=(852,480) if compressed else (1920, 1080) 
         )
 
 

@@ -431,7 +431,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             )        
             results = "Video Rendered Successfully", 1
             logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
-            logging.debug("Completed in {} seconds".format(time.time() - start_time))
+            logging.debug("Completed in {} seconds".format(time.time() - start_time_count))
             logging.debug("Closing render instance - Compress")
             if send_end is not None:
                 send_end.send(results)            
@@ -460,7 +460,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             )        
             results = "Video Rendered Successfully", 1
             logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
-            logging.debug("Completed in {} seconds".format(time.time() - start_time))
+            logging.debug("Completed in {} seconds".format(time.time() - start_time_count))
             logging.debug("Closing render instance - Full")
             if send_end is not None:
                 send_end.send(results)            

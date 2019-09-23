@@ -264,3 +264,25 @@ def update_order(json_data, starting_point, amount):
     print(json_data)
     return json_data
     
+
+def split_text(caption):
+    """
+    Takes a caption, and attempts to do a few things:
+
+    divides the string by two to get the middle of the string
+    searches left and right to find the closest space charater
+    breaks the string into two at the space closest to the middle
+    replaces the space between two strings with a new line
+    returns the new string
+    """
+    caption = list(caption)
+    left, right = ''.join(caption[:len(caption)//2]), ''.join(caption[len(caption)//2:])
+
+    left_val = left.find(' ')
+    right_val = right.find(' ')
+    
+
+    caption.insert((min(left_val+len(caption)//2, right_val+len(caption)//2)), '\n')
+
+    
+    return ''.join(caption)
