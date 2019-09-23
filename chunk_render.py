@@ -189,6 +189,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
     top_audio = []
     cutaway_timeline = 0
     print("Clips ready in: ", time.time() - start_time_count)
+    caption_list = []
     for clip_name in json_data['CutAwayFootage']:
         logging.debug(clip_name + ":")
         logging.debug("Cutaway Timeline: {}".format(cutaway_timeline))
@@ -204,7 +205,8 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
             # Generate caption data
             logging.debug("Generating audio for {}".format(clip_name))
-            clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+            cclip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+            caption_list.append(cclip)
             logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
             top_audio.append(clip.audio)
 
@@ -245,20 +247,34 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
     if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
         logging.debug("Intro clip found")
         logging.error("WE ARE CURRENTLY NOT IMPLEMENTING INTROS")
-        """       
-        intro_clip = generateEffects.create_intro_clip(user, compressed=True)
+        """
+        intro_clip, is_transparent = generateEffects.create_intro(video_list[0], compressed=compress_render or chunk_render)
+        
+        if is_transparent:
+            top_audio.pop(0)
+            video_list.pop(0)
+               
         video_list.insert(0, intro_clip)
         logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(intro_clip, intro_clip.audio, intro_clip.duration))
         top_audio.insert(0, intro_clip.audio)
-        bottom_audio.insert(0, intro_clip.audio)"""
+        if not is_transparent:
+            bottom_audio.insert(0, intro_clip.audio)
+        """
     else:
         logging.error("No intro clip found, continuing")
+
+    new_list = video_list.pop(0)
+    print(new_list)
+    for item in range(len(caption_list)):
+        new_list = CompositeVideoClip([new_list, caption_list[item]])
+    
+    new_list.write_videofile('all_captions.mp4')
 
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)    
     logging.debug("Top audio len: {}".format(round(top_audio.duration, 2)))
 
-        
+
     # Try adding the music if it exists
     logging.debug("Attempting to add music...")
     try:
@@ -474,3 +490,5 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             if send_end is not None:
                 send_end.send(results)            
             return results                     
+
+get_chunk("2336", compress_render=True)

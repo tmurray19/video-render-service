@@ -21,30 +21,54 @@ positions = {
 }
 """
 positions_small = {
-    1: (0.08, 0.1),  # Top Left
-    2: (0.75, 0.1),  # Top Right
-    3: (0.45, 0.1),  # Top Center
-    4: (0.08, 0.5),  # Center Left
+    1: (0.08, 0.125),  # Top Left
+    2: (0.8, 0.125),  # Top Right
+    3: (0.45, 0.125),  # Top Center
+    4: (0.08, 'center'),  # Center Left
     5: ('center','center'),  # Center of image
-    6: (0.75, 0.5),  # Center Right
-    7: (0.08, 0.7),  # Bottom Left
-    8: (0.45, 0.7),  # Bottom Center
-    9: (0.75, 0.7)  # Bottom Right
+    6: (0.8, 'center'),  # Center Right
+    7: (0.08, 0.825),  # Bottom Left
+    8: (0.45, 0.825),  # Bottom Center
+    9: (0.8, 0.825)  # Bottom Right
 }
 
 positions_medium = {
+    1: (0.08, 0.112),  # Top Left
+    2: (0.7, 0.112),  # Top Right
+    3: (0.45, 0.112),  # Top Center
+    4: (0.08, 'center'),  # Center Left
+    5: (0.45,'center'),  # Center of image
+    6: (0.7, 'center'),  # Center Right
+    7: (0.08, 0.8),  # Bottom Left
+    8: (0.45, 0.8),  # Bottom Center
+    9: (0.7, 0.8)  # Bottom Right
+}
+
+positions_large = {
     1: (0.03, 0.01),  # Top Left
     2: (0.3, 0.01),  # Top Right
     3: (0.5, 0.01),  # Top Center
-    4: (0.03, 0.45),  # Center Left
+    4: (0.03, 'center'),  # Center Left
     5: ('center','center'),  # Center of image
-    6: (0.5, 0.45),  # Center Right
+    6: (0.5, 'center'),  # Center Right
     7: (0.03, 0.75),  # Bottom Left
     8: (0.3, 0.75),  # Bottom Center
     9: (0.5, 0.75)  # Bottom Right
 }
 
-positions_large = {
+positions_xlarge = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.4, 0.01),  # Top Right
+    3: (0.25, 0.01),  # Top Center
+    4: (0.02, 0.4),  # Center Left
+    5: ('center','center'),  # Center of image
+    6: (0.4, 0.4),  # Center Right
+    7: (0.02, 0.75),  # Bottom Left
+    8: (0.25, 0.75),  # Bottom Center
+    9: (0.4, 0.75)  # Bottom Right
+}
+
+positions_xxlarge = {
     1: (0.02, 0.01),  # Top Left
     2: (0.4, 0.01),  # Top Right
     3: (0.25, 0.01),  # Top Center
@@ -280,28 +304,49 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             fontsize=font_size,
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
-            method='caption',
-            size=(852,480) if compressed else (1920, 1080) 
+            #method='caption',
+            #size=(852,480) if compressed else (1920, 1080) 
         )
 
 
         if font_from_json == "XX-Large":
+            print(positions_xxlarge[caption_data.get('screenPos')])
             text_caption = text_caption.set_position(
                 positions_large[caption_data.get('screenPos')], 
                 relative=True
                 ).set_duration(dur)        
-        elif font_from_json == "Small" or font_from_json == "Medium":
+        elif font_from_json == "Small":
+            print(positions_small[caption_data.get('screenPos')])
             text_caption = text_caption.set_position(
                 positions_small[caption_data.get('screenPos')], 
                 relative=True
                 ).set_duration(dur)
-        elif font_from_json == "Large" or font_from_json == "X-Large":
+        elif font_from_json == "Medium":
+            print(positions_medium[caption_data.get('screenPos')])
+            text_caption = text_caption.set_position(
+                positions_medium[caption_data.get('screenPos')], 
+                relative=True
+                ).set_duration(dur)
+        elif font_from_json == "Large":
+            print(positions_large[caption_data.get('screenPos')])
+            text_caption = text_caption.set_position(
+                positions_medium[caption_data.get('screenPos')], 
+                relative=True
+                ).set_duration(dur)
+        elif font_from_json == "X-Large":
+            print(positions_medium[caption_data.get('screenPos')])
             text_caption = text_caption.set_position(
                 positions_medium[caption_data.get('screenPos')], 
                 relative=True
                 ).set_duration(dur)
 
+
+
+
         text_caption.fps = 24
+        
+        return text_caption
+
         clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
     
         return clip
