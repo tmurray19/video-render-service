@@ -264,11 +264,17 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
         logging.error("No intro clip found, continuing")
 
     new_list = video_list.pop(0)
+    new_list.save_frame('caption_placing.jpg', t=1)
     print(new_list)
     for item in range(len(caption_list)):
         new_list = CompositeVideoClip([new_list, caption_list[item]])
     
+
+    
+
     new_list.write_videofile('all_captions.mp4')
+
+    return
 
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)    
@@ -491,4 +497,4 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 send_end.send(results)            
             return results                     
 
-get_chunk("2336", compress_render=True)
+get_chunk("0101", compress_render=True)

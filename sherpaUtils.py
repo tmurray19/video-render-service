@@ -276,14 +276,24 @@ def split_text(caption):
     returns the new string
     """
     caption = list(caption)
+    print(len(caption))
     left, right = ''.join(caption[:len(caption)//2]), ''.join(caption[len(caption)//2:])
+    print(left)
+    print(right)
 
-    left_val = left.rfind(' ')
+    left_val = len(left) - left.rfind(' ')
+    print(left_val)
+    print(left[left_val])
     right_val = right.find(' ')
+    print(right_val)
+    print(right[right_val])
     print(left_val + len(caption)//2)
     print(right_val + len(caption)//2)
 
-    caption.insert((min(left_val+len(caption)//2, right_val+len(caption)//2)), '\n')
+    replace_val = len(caption)//2 + right_val if ( right_val < left_val) else len(caption)//2 - left_val
+
+    caption[replace_val] = '\n'
+    logging.debug("Replaced position {} of {} with a newline".format(replace_val, caption))
 
     
     return ''.join(caption)

@@ -19,54 +19,6 @@ positions = {
     8: ("center", "bottom"),  # Center bottom
     9: ("right", "bottom")  # Center right
 }
-"""
-positions_small = {
-    1: (0.08, 0.125),  # Top Left
-    2: (0.8, 0.125),  # Top Right
-    3: (0.45, 0.125),  # Top Center
-    4: (0.08, 'center'),  # Center Left
-    5: ('center','center'),  # Center of image
-    6: (0.8, 'center'),  # Center Right
-    7: (0.08, 0.825),  # Bottom Left
-    8: (0.45, 0.825),  # Bottom Center
-    9: (0.8, 0.825)  # Bottom Right
-}
-
-positions_medium = {
-    1: (0.08, 0.112),  # Top Left
-    2: (0.7, 0.112),  # Top Right
-    3: (0.45, 0.112),  # Top Center
-    4: (0.08, 'center'),  # Center Left
-    5: (0.45,'center'),  # Center of image
-    6: (0.7, 'center'),  # Center Right
-    7: (0.08, 0.8),  # Bottom Left
-    8: (0.45, 0.8),  # Bottom Center
-    9: (0.7, 0.8)  # Bottom Right
-}
-
-positions_large = {
-    1: (0.03, 0.01),  # Top Left
-    2: (0.3, 0.01),  # Top Right
-    3: (0.5, 0.01),  # Top Center
-    4: (0.03, 'center'),  # Center Left
-    5: ('center','center'),  # Center of image
-    6: (0.5, 'center'),  # Center Right
-    7: (0.03, 0.75),  # Bottom Left
-    8: (0.3, 0.75),  # Bottom Center
-    9: (0.5, 0.75)  # Bottom Right
-}
-
-positions_xlarge = {
-    1: (0.02, 0.01),  # Top Left
-    2: (0.4, 0.01),  # Top Right
-    3: (0.25, 0.01),  # Top Center
-    4: (0.02, 0.4),  # Center Left
-    5: ('center','center'),  # Center of image
-    6: (0.4, 0.4),  # Center Right
-    7: (0.02, 0.75),  # Bottom Left
-    8: (0.25, 0.75),  # Bottom Center
-    9: (0.4, 0.75)  # Bottom Right
-}
 
 positions_xxlarge = {
     1: (0.02, 0.01),  # Top Left
@@ -79,6 +31,129 @@ positions_xxlarge = {
     8: (0.25, 0.75),  # Bottom Center
     9: (0.4, 0.75)  # Bottom Right
 }
+"""
+# All the values if the lenght is over a certain amount
+positions_small = {
+    1: (0.08, 0.125),  # Top Left
+    2: (0.8, 0.125),  # Top Right
+    3: (0.45, 0.125),  # Top Center
+    4: (0.08, 'center'),  # Center Left
+    5: (0.45,'center'),  # Center of image
+    6: (0.8, 'center'),  # Center Right
+    7: (0.08, 0.825),  # Bottom Left
+    8: (0.45, 0.825),  # Bottom Center
+    9: (0.8, 0.825)  # Bottom Right
+}
+
+positions_medium = {
+    1: (0.08, 0.112),  # Top Left
+    2: (0.75, 0.112),  # Top Right
+    3: (0.425, 0.112),  # Top Center
+    4: (0.08, 0.445),  # Center Left
+    5: (0.425, 0.445),  # Center of image
+    6: (0.75, 0.445),  # Center Right
+    7: (0.08, 0.8),  # Bottom Left
+    8: (0.425, 0.8),  # Bottom Center
+    9: (0.75, 0.8)  # Bottom Right
+}
+
+positions_large = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.3, 0.01),  # Top Right
+    3: (0.4, 0.01),  # Top Center
+    4: (0.02, 0.445),  # Center Left
+    5: (0.3,0.445),  # Center of image
+    6: (0.4, 0.445),  # Center Right
+    7: (0.01, 0.675),  # Bottom Left
+    8: (0.3, 0.675),  # Bottom Center
+    9: (0.4, 0.675)  # Bottom Right
+}
+
+positions_xlarge = {
+    1: (0, 0),  # Top Left
+    2: (452, 452),  # Top Right
+    3: (0.25, 0.01),  # Top Center
+    4: (0.02, 0.325),  # Center Left
+    5: (0.25, 0.325),  # Center of image
+    6: (0.45, 0.325),  # Center Right
+    7: (0.02, 0.6),  # Bottom Left
+    8: (0.25, 0.6),  # Bottom Center
+    9: (0.45, 0.6)  # Bottom Right
+}
+
+positions_xxlarge = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.2125, 0.01),  # Top Right
+    3: (0.175, 0.01),  # Top Center
+    4: (0.02, 0.3),  # Center Left
+    5: (0.175, 0.3),  # Center of image
+    6: (0.2125, 0.3),  # Center Right
+    7: (0.02, 0.5),  # Bottom Left
+    8: (0.175, 0.5),  # Bottom Center
+    9: (0.2125, 0.5)  # Bottom Right
+}
+
+
+# No Split
+positions_small_nosplit = {
+    1: (0.08, 0.125),  # Top Left
+    2: (0.8, 0.125),  # Top Right
+    3: (0.45, 0.125),  # Top Center
+    4: (0.08, 'center'),  # Center Left
+    5: (0.45,'center'),  # Center of image
+    6: (0.8, 'center'),  # Center Right
+    7: (0.08, 0.825),  # Bottom Left
+    8: (0.45, 0.825),  # Bottom Center
+    9: (0.8, 0.825)  # Bottom Right
+}
+
+positions_medium_nosplit = {
+    1: (0.08, 0.112),  # Top Left
+    2: (0.75, 0.112),  # Top Right
+    3: (0.425, 0.112),  # Top Center
+    4: (0.08, 0.445),  # Center Left
+    5: (0.425, 0.445),  # Center of image
+    6: (0.75, 0.445),  # Center Right
+    7: (0.08, 0.8),  # Bottom Left
+    8: (0.425, 0.8),  # Bottom Center
+    9: (0.75, 0.8)  # Bottom Right
+}
+
+positions_large_nosplit = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.3, 0.01),  # Top Right
+    3: (0.4, 0.01),  # Top Center
+    4: (0.02, 0.445),  # Center Left
+    5: (0.3,0.445),  # Center of image
+    6: (0.4, 0.445),  # Center Right
+    7: (0.01, 0.675),  # Bottom Left
+    8: (0.3, 0.675),  # Bottom Center
+    9: (0.4, 0.675)  # Bottom Right
+}
+
+positions_xlarge_nosplit = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.4, 0.01),  # Top Right
+    3: (0.25, 0.01),  # Top Center
+    4: (0.02, 0.4),  # Center Left
+    5: (0.25,0.4),  # Center of image
+    6: (0.4, 0.4),  # Center Right
+    7: (0.02, 0.75),  # Bottom Left
+    8: (0.25, 0.75),  # Bottom Center
+    9: (0.4, 0.75)  # Bottom Right
+}
+positions_xxlarge_nosplit = {
+    1: (0.02, 0.01),  # Top Left
+    2: (0.4, 0.01),  # Top Right
+    3: (0.25, 0.01),  # Top Center
+    4: (0.02, 0.4),  # Center Left
+    5: (0.25,0.4),  # Center of image
+    6: (0.4, 0.4),  # Center Right
+    7: (0.02, 0.75),  # Bottom Left
+    8: (0.25, 0.75),  # Bottom Center
+    9: (0.4, 0.75)  # Bottom Right
+}
+
 
 
 
@@ -279,6 +354,7 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
     try:
         caption_data = edit_data['Caption']
         font_from_json = caption_data.get('fontSize')
+        print(font_from_json)
         font_size = round(sizes[font_from_json] * 0.44357) if compressed else sizes[font_from_json]
         logging.debug("Font size is {}, converted to {}".format(font_from_json, font_size))
     
@@ -288,8 +364,11 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         dur = max(1, clip.duration - 2)
         logging.debug("Duration of text clip is {}".format(dur))
     
+
+        split=False
         if font_from_json != 'XX-Large' or font_from_json != 'X-Large':
             if len(caption_text) > 18:
+                split = True
                 try:
                     caption_text = sherpaUtils.split_text(caption_text)
                 except:
@@ -308,37 +387,68 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             #size=(852,480) if compressed else (1920, 1080) 
         )
 
-
-        if font_from_json == "XX-Large":
-            print(positions_xxlarge[caption_data.get('screenPos')])
-            text_caption = text_caption.set_position(
-                positions_large[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)        
-        elif font_from_json == "Small":
-            print(positions_small[caption_data.get('screenPos')])
-            text_caption = text_caption.set_position(
-                positions_small[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)
-        elif font_from_json == "Medium":
-            print(positions_medium[caption_data.get('screenPos')])
-            text_caption = text_caption.set_position(
-                positions_medium[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)
-        elif font_from_json == "Large":
-            print(positions_large[caption_data.get('screenPos')])
-            text_caption = text_caption.set_position(
-                positions_medium[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)
-        elif font_from_json == "X-Large":
-            print(positions_medium[caption_data.get('screenPos')])
-            text_caption = text_caption.set_position(
-                positions_medium[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)
+        if split:
+            if font_from_json == "XX-Large":
+                print(positions_xxlarge[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_xxlarge[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)        
+            elif font_from_json == "Small":
+                print(positions_small[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_small[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+            elif font_from_json == "Medium":
+                print(positions_medium[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_medium[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+            elif font_from_json == "Large":
+                print(positions_large[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_large[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+            elif font_from_json == "X-Large":
+                print(positions_xlarge[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_xlarge[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+        else:
+            if font_from_json == "XX-Large":
+                print(positions_xxlarge_nosplit[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_xxlarge_nosplit[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)        
+            elif font_from_json == "Small":
+                print(positions_small_nosplit[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_small_nosplit[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+            elif font_from_json == "Medium":
+                print(positions_medium_nosplit[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_medium_nosplit[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+            elif font_from_json == "Large":
+                print(positions_large_nosplit[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_large_nosplit[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
+            elif font_from_json == "X-Large":
+                print(positions_xlarge_nosplit[caption_data.get('screenPos')])
+                text_caption = text_caption.set_position(
+                    positions_xlarge_nosplit[caption_data.get('screenPos')], 
+                    relative=True
+                    ).set_duration(dur)
 
 
 
