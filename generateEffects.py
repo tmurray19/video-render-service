@@ -7,19 +7,19 @@ import logging
 
 resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH)
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
-"""
 positions = {
-    1: ("left", "top"),  # Top Left
-    2: ("right", "top"),  # Top Right
-    3: ("center", "top"),  # Top center
-    4: ("left", "center"),  # Center left
-    5: "center",  # Center of image
-    6: ("right", "center"),  # Center right
-    7: ("left", "bottom"),  # Center left
-    8: ("center", "bottom"),  # Center bottom
-    9: ("right", "bottom")  # Center right
+    1: [("left", "top"), "West"],  # Top Left
+    2: [("right", "top"), "East"],  # Top Right
+    3: [("center", "top"), "Center"],  # Top center
+    4: [("left", "center"), "West"],  # Center left
+    5: [("center"), "Center"],  # Center of image
+    6: [("right", "center"), "East"],  # Center right
+    7: [("left", "bottom"), "West"],  # Center left
+    8: [("center", "bottom"), "Center"],  # Center bottom
+    9: [("right", "bottom"), "East"]  # Center right
 }
-"""
+
+
 positions_small = {
     1: (0.08, 0.1),  # Top Left
     2: (0.75, 0.1),  # Top Right
@@ -260,19 +260,17 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
     
         caption_text = caption_data.get('text')
 
+        rez = (752, 380) if compressed else (1820, 980)
+
         # TODO: Change
         dur = max(1, clip.duration - 2)
         logging.debug("Duration of text clip is {}".format(dur))
-    
-        if font_from_json != 'XX-Large' or font_from_json != 'X-Large':
-            if len(caption_text) > 18:
-                try:
-                    caption_text = sherpaUtils.split_text(caption_text)
-                except:
-                    logging.error("Caption data could not be split safely")
-                    logging.exception('')
-        
+
         print(caption_text)
+
+        screen_pos, cardinal = positions[caption_data.get('screenPos')]
+        print(screen_pos)
+        print(cardinal)
 
         # Define Text Data
         text_caption = myp.TextClip(
@@ -281,28 +279,18 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
             method='caption',
-            size=(852,480) if compressed else (1920, 1080) 
-        )
+            align=cardinal
+        ).set_duration(
+                dur
+            )     
 
 
-        if font_from_json == "XX-Large":
-            text_caption = text_caption.set_position(
-                positions_large[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)        
-        elif font_from_json == "Small" or font_from_json == "Medium":
-            text_caption = text_caption.set_position(
-                positions_small[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)
-        elif font_from_json == "Large" or font_from_json == "X-Large":
-            text_caption = text_caption.set_position(
-                positions_medium[caption_data.get('screenPos')], 
-                relative=True
-                ).set_duration(dur)
+
+        text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)], size=rez)
+
 
         text_caption.fps = 24
-        clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
+        clip = myp.CompositeVideoClip([clip, text_caption.set_position('center').set_start(1)])
     
         return clip
 
