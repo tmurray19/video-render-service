@@ -284,7 +284,7 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             fontsize=font_size,
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
-            method='caption',
+            #method='caption',
             #align=cardinal
         ).set_duration(
                 dur
