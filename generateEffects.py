@@ -413,8 +413,11 @@ def get_fps(proj_id):
     json_data = sherpaUtils.open_proj(proj_id)
 
     first_clip = json_data['CutAwayFootage'][next(iter(json_data['CutAwayFootage']))]
+    logging.debug("First Clip")
+    logging.debug(first_clip)
     clip = generate_clip(first_clip['Meta'], proj_id)
-    print(clip.fps)
+
+    logging.debug("Clip FPS: {}".format(clip.fps))
     proj_fps = clip.fps
     logging.debug("proj_fps set to {}".format(proj_fps))
     return proj_fps
