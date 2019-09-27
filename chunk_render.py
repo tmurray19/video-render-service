@@ -51,7 +51,8 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
 
 
 
-    fps = generateEffects.get_fps(user)
+    global_frames = generateEffects.get_fps(user)
+    logging.debug("Global fps has been set to {}".format(global_frames))
 
 
 
@@ -359,7 +360,8 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
 
                 start_time+=chunk_len
                 logging.debug("Segment {} is {}s long".format(i, round(preview_clip.duration, 2)))
-                preview_clip.fps = fps
+                logging.debug("Global framerate: {}".format(global_frames))
+                preview_clip.fps = global_frames
                 if preview_clip.duration < chunk_len/2:
                     logging.debug("Clip is smaller than {}s, so appending it to last clip instead.".format(chunk_len/2))
                     preview_clip = concatenate_videoclips([preview_clip, preview_chunks[-1]])
@@ -378,7 +380,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 try:
                     vid_name = user + "_com_chunk_" + str(preview_chunks.index(video)) + "_edited.mp4"
                     vid_dir = os.path.join(attach_dir, user, vid_name)
-
+                    logging.debug("Global framerate: {}".format(global_frames))
                     logging.debug("Rendering {} at time {}s".format(vid_name, (time.time() - start_time_count)))
                     video.write_videofile(
                         vid_dir,
@@ -387,7 +389,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                         bitrate="1000k",
                         audio_codec="aac",
                         remove_temp=True,
-                        fps=fps
+                        fps=global_frames
                     )
                     results = "Chunk {} Rendered Successfully".format(str(preview_chunks.index(video))), 1
                     results = "Chunk 1 Rendered Successfully", 1
@@ -426,7 +428,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 bitrate="1000k",
                 audio_codec="aac",
                 remove_temp=True,
-                fps=fps
+                fps=global_frames
             )        
             print(("Done in {} seconds".format(time.time() - start_time_count)))
             logging.debug("Done in {} seconds".format(time.time() - start_time_count))
@@ -444,13 +446,14 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
         try:            
             vid_name = user + "_com_preview_edited.mp4"
             vid_dir = os.path.join(attach_dir, user, vid_name)
+            logging.debug("Global framerate: {}".format(global_frames))
             finished_video.write_videofile(
                 vid_dir,
                 threads=8,
                 bitrate="1000k",
                 audio_codec="aac",
                 remove_temp=True,
-                fps=fps
+                fps=global_frames
             )        
             results = "Video Rendered Successfully", 1
             logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
@@ -473,6 +476,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             vid_name = user + "_edited.mp4"
             vid_dir = os.path.join(attach_dir, user, vid_name)
             logging.debug("Rendering {}".format(vid_name))
+            logging.debug("Global framerate: {}".format(global_frames))
             finished_video.write_videofile(            
                 vid_dir,
                 threads=8,
