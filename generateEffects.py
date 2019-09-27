@@ -415,7 +415,9 @@ def get_fps(proj_id):
     first_clip = json_data['CutAwayFootage'][next(iter(json_data['CutAwayFootage']))]
     logging.debug("First Clip")
     logging.debug(first_clip)
-    clip = generate_clip(first_clip['Meta'], proj_id)
+    clip_name = first_clip['Meta'].get('name')+".mp4"
+
+    clip = myp.VideoFileClip(os.path.join(attach_dir, proj_id, clip_name))
 
     logging.debug("Clip FPS: {}".format(clip.fps))
     proj_fps = clip.fps
