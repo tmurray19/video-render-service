@@ -12,7 +12,24 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
     start_time_count = time.time()      
     log_name = datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_chunk_service_instance_id_{}_TESTING.log".format(user)
 
-    json_data = sherpaUtils.open_proj(user)
+    # Look for the json file in the project folder
+    try:
+        json_data = sherpaUtils.open_proj(user)
+    except FileNotFoundError as e:
+        logging.error("File or folder cannot be found")
+        logging.error(e)
+        results = "Render exited without error [Unable to find file or folder]", 0        
+        if send_end is not None:
+            send_end.send(results)
+        return results
+
+    # If a file can be found, but no edit data exists in the file
+    if not json_data['CutAwayFootage'] and not json_data['InterviewFootage']:
+        logging.error("This project seems to have no edit data recorded. Exiting render session")
+        results = "Render exited without error [No edit data exists in JSON]", 0        
+        if send_end is not None:
+            send_end.send(results)            
+        return results
 
     # Collecting garbage to clear out memory
     gc.collect()
@@ -31,6 +48,12 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
         datefmt='%Y-%m-%d %H:%M:%S',
         filename=log_file_name)
     logging.debug("Beginning render instance of project id {}".format(user))
+
+
+
+
+
+
 
     # Get timeline lengths
     cutaway_timeline_length = round(sherpaUtils.calculate_timeline_length(json_data['CutAwayFootage']), 2)
