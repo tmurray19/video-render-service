@@ -483,7 +483,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 audio_codec="aac",
                 bitrate="8000k",
                 remove_temp=True,
-                fps=fps
+                fps=global_frames
             )        
             results = "Video Rendered Successfully", 1
             logging.debug("File '{}' successfully written to {}".format(vid_name, vid_dir))
