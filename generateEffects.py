@@ -88,6 +88,9 @@ music_list = {
     18: "Water_Lily.mp3",
 }
 
+proj_fps=0
+
+
 # Generate a blank image
 # Add text right now just for clarity sake
 def generate_blank(clip_data, start=None, end=None, compressed=False):
@@ -116,7 +119,7 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
-    blank_clip.fps = 24
+    blank_clip.fps = proj_fps
 
     return blank_clip
 
@@ -154,7 +157,7 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
         audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
         clip = clip.set_audio(audio.set_duration(end - start))
 
-    clip.fps = 24
+    clip.fps = proj_fps
     return clip
 
 
@@ -182,7 +185,7 @@ def generate_image_clip(clip_data, user):
     audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
 
     image_clip = image_clip.set_audio(audio.set_duration(dur))
-    image_clip.fps = 24
+    image_clip.fps = proj_fps
 
     logging.debug("Image clip successfully generated.")
 
@@ -279,17 +282,17 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
             method='caption',
-            align=cardinal
+            #align=cardinal
         ).set_duration(
                 dur
             )     
 
 
 
-        text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)], size=rez)
+        text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)])#, size=rez)
 
 
-        text_caption.fps = 24
+        text_caption.fps = proj_fps
         clip = myp.CompositeVideoClip([clip, text_caption.set_position('center').set_start(1)])
     
         return clip
@@ -393,3 +396,21 @@ def get_blank_audio(clip_data):
     audio = audio.set_duration(sherpaUtils.calculate_clip_length(clip_data['Meta']))
 
     return audio
+
+def get_fps(proj_id):
+    # Open proj_id
+    # Get first clip
+    # return fps
+    global proj_fps
+    print(proj_fps)
+    if proj_fps > 0:
+        print("Return")
+        return proj_fps
+    
+    json_data = sherpaUtils.open_proj(proj_id)
+
+    first_clip = json_data['CutAwayFootage'][next(iter(json_data['CutAwayFootage']))]
+    clip = generate_clip(first_clip['Meta'], proj_id)
+    print(clip.fps)
+    proj_fps = clip.fps
+    return proj_fps
