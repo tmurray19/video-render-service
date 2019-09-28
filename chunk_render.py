@@ -331,7 +331,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
     finished_video = finished_video.set_audio(finished_audio)
 
     try:
-        vid_type = json_file['VideoType']
+        vid_type = json_data['VideoType']
         insta_rez = (round(1350*0.44357), round(1080*0.44357)) if compressed else (1350, 1080)
         if vid_type == "Square":
             logging.debug("Resizing video to {}".format(insta_rez))

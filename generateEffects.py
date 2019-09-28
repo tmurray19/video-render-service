@@ -274,6 +274,8 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         print(caption_text)
 
         screen_pos, cardinal = positions[caption_data.get('screenPos')]
+        logging.debug(screen_pos)
+        logging.debug(cardinal)
         print(screen_pos)
         print(cardinal)
 
