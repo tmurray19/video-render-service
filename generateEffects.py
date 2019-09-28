@@ -263,12 +263,11 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         font_from_json = caption_data.get('fontSize')
         font_size = round(sizes[font_from_json] * 0.44357) if compressed else sizes[font_from_json]
         logging.debug("Font size is {}, converted to {}".format(font_from_json, font_size))
-    
+        
         caption_text = caption_data.get('text')
 
         rez = (752, 380) if compressed else (1820, 980)
 
-        # TODO: Change
         dur = max(1, clip.duration - 2)
         logging.debug("Duration of text clip is {}".format(dur))
 
@@ -296,7 +295,8 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
 
         logging.debug("FPS is: {}".format(proj_fps))
         text_caption.fps = proj_fps
-        clip = myp.CompositeVideoClip([clip, text_caption.set_position('center').set_start(1)])
+        #clip = myp.CompositeVideoClip([clip, text_caption.set_position('center').set_start(1)])
+        clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
     
         return clip
 
