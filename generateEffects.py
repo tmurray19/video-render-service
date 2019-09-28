@@ -292,8 +292,9 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             )     
 
 
+        #text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)])#, size=rez)
 
-        text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)])#, size=rez)
+        text_caption = text_caption.set_position(screen_pos)
 
         logging.debug("FPS is: {}".format(proj_fps))
         text_caption.fps = proj_fps
