@@ -412,14 +412,18 @@ def get_fps(proj_id):
     
     json_data = sherpaUtils.open_proj(proj_id)
 
-    first_clip = json_data['CutAwayFootage'][next(iter(json_data['CutAwayFootage']))]
-    logging.debug("First Clip")
-    logging.debug(first_clip)
-    clip_name = first_clip['Meta'].get('name')+".mp4"
+    for item in json_data['CutAwayFootage']:
+        if json_data['CutAwayFootage'][item]['Meta']['clipType'] == "CutAway" or json_data['CutAwayFootage'][item]['Meta']['clipType'] == "Interview":
+            first_clip = json_data['CutAwayFootage'][item]
+            logging.debug("First Clip")
+            logging.debug(first_clip)
+            clip_name = first_clip['Meta'].get('name')+".mp4"
 
-    clip = myp.VideoFileClip(os.path.join(attach_dir, proj_id, clip_name))
+            clip = myp.VideoFileClip(os.path.join(attach_dir, proj_id, clip_name))
 
-    logging.debug("Clip FPS: {}".format(clip.fps))
-    proj_fps = clip.fps
-    logging.debug("proj_fps set to {}".format(proj_fps))
-    return proj_fps
+            logging.debug("Clip FPS: {}".format(clip.fps))
+            proj_fps = clip.fps
+            logging.debug("proj_fps set to {}".format(proj_fps))
+            return proj_fps
+    
+    return 24
