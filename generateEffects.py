@@ -377,25 +377,6 @@ def create_intro_clip(proj_id, compressed):
     return intro_clip
 
 
-def generate_intro(clip, compressed, transparent=False):
-    logging.debug("Adding intro")
-    # We need to handle audio here for composite clips
-    if transparent is True:
-        logging.debug("Intro is transparent, need to composite clip on top of intro clip")
-        
-        # Generate intro clip
-        intro = None
-        # Composite both clips
-        intro_composite = myp.CompositeVideoClip(clip, intro)
-        intro_composite = intro_composite.set_audio(clip.audio)
-        return intro_composite, True 
-    else:
-        logging.debug("We can just append this to the start of the video instead")
-        intro = None
-        intro_audio = myp.AudioFileClip(os.path.join(attach_dir, Config.RESOURCE_PATH, "silence.mp3"))
-        intro = intro.set_audio(intro_audio)
-        return intro, False
-
 def get_blank_audio(clip_data):
     """
     Generates a blank audio clip given the blank audio data

@@ -1,8 +1,9 @@
-from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
+from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, AudioFileClip
 from config import Config
 from datetime import datetime
 from math import ceil
 import generateEffects, sherpaUtils, os, time, logging, gc, copy
+from intro_generation import getAndProcessTemplate
 
 
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
@@ -266,17 +267,25 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
     bottom_audio = generateEffects.interview_audio_builder(interview_data=json_data['InterviewFootage'], user=user)
 
     # We need to insert the intro if it exists
-    if os.path.exists(os.path.join(attach_dir, user, "intro.mp4")):
-        logging.debug("Intro clip found")
-        logging.error("WE ARE CURRENTLY NOT IMPLEMENTING INTROS")
-        """       
-        intro_clip = generateEffects.create_intro_clip(user, compressed=True)
-        video_list.insert(0, intro_clip)
-        logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(intro_clip, intro_clip.audio, intro_clip.duration))
-        top_audio.insert(0, intro_clip.audio)
-        bottom_audio.insert(0, intro_clip.audio)"""
-    else:
-        logging.error("No intro clip found, continuing")
+    logging.debug("Creating intro")
+    try:
+        intro, transparent = getAndProcessTemplate.getandprocesstemplate(proj_id)
+        if transparent:
+            logging.debug("Transparent intro")
+            logging.debug("Creating composite of intro and first clip in render")            
+            first_clip = video_list.pop(0)
+            intro = CompositeVideoClip([intro, first_clip])
+            logging.debug("Replacing first clip in project with intro")
+            video_list.insert(0, intro)
+            # No sound adding necessary, transparent intros take sound from first clip
+        else:
+            logging.debug("Opaque intro")
+            intro.audio = AudioFileClip(os.path.join(resource_path, 'silence.mp3')).set_duration(intro.duration)
+            video_list.insert(0, intro)
+            top_audio.insert(0, intro.audio)
+    except:
+        logging.error("Error occured during intro generation")
+        logging.exception('')
 
     # Concatenate the clips together
     top_audio = concatenate_audioclips(top_audio)    
