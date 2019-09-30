@@ -286,20 +286,24 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
             font=caption_data.get('font'),
             color=caption_data.get('fontColour'),
             #method='caption',
-            #align=cardinal
+            #align=cardinal,
+            #size=rez
         ).set_duration(
                 dur
-            )     
+            )
 
-
-        #text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)])#, size=rez)
-
-        text_caption = text_caption.set_position(screen_pos)
+        print("Before")
+        print(text_caption.size)
+        text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)], size=rez)
+        print("After")
+        print(text_caption.size)
+        #text_caption = text_caption.set_position(screen_pos)
 
         logging.debug("FPS is: {}".format(proj_fps))
         text_caption.fps = proj_fps
-        #clip = myp.CompositeVideoClip([clip, text_caption.set_position('center').set_start(1)])
-        clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
+        clip = myp.CompositeVideoClip([clip, text_caption.set_position('center').set_start(1)])
+        print(clip.size)
+        #clip = myp.CompositeVideoClip([clip, text_caption.set_start(1)])
     
         return clip
 
