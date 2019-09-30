@@ -27,15 +27,18 @@ def getandprocesstemplate(proj_id):
     logging.debug('getandprocesstemplate: got template details' + str(template_info.templateID))
 
     process_status = None
+    transparent = False
 
     if str(template_info.templateID) == "1":
         process_status = template_1.createintro(proj_id)
     if str(template_info.templateID) == "2":
         process_status = template_2.createintro(proj_id)
+        transparent = True
     if str(template_info.templateID) == "3":
         process_status = template_3.createintro(proj_id)
     if str(template_info.templateID) == "4":
         process_status = template_4.createintro(proj_id)
+        transparent = True
     if str(template_info.templateID) == "5":
         process_status = template_5.createintro(proj_id)
     # Blank - Black BG
@@ -45,7 +48,7 @@ def getandprocesstemplate(proj_id):
     if str(template_info.templateID) == "7":
         process_status = template_7.createintro(proj_id)
 
-    return process_status
+    return process_status, transparent
 
 
 
