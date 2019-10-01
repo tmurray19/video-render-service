@@ -165,6 +165,7 @@ def blank_json_replace(blank_start, blank_end, json_data, blank_clip):
     #print(json_data['InterviewFootage'])
     for item in json_data['InterviewFootage']:
         if json_data['InterviewFootage'][item]['Meta']['fullContextStart'] <= blank_start:
+            logging.debug("Attempting to find the relevant clips to play instead of the blank")
             if json_data['InterviewFootage'][item]['Meta']['fullContextStart'] < blank_start and json_data['InterviewFootage'][item]['Meta']['fullContextEnd'] <= blank_start :
                 # Clip doesn't play during blank
                 continue
@@ -173,14 +174,16 @@ def blank_json_replace(blank_start, blank_end, json_data, blank_clip):
             interview_clip = tidy_clip(interview_clip, blank_start, blank_end, blank_clip)           
              # Either clip plays over full blank duration, or it doesn't                
             if json_data['InterviewFootage'][item]['Meta']['fullContextEnd'] >= blank_end:
+                logging.debug("Single clip plays over entirety of blank")
                 # This is if it does
-
+                logging.debug(interview_clip)
                 print(interview_clip)
                 print(json_data['InterviewFootage'])
 
                 return interview_clip
             else:
                 try:
+                    logging.debug("We have found multiple clips that should be playing over the blank")
                     time_to_fill = (blank_end - blank_start)
                     print("TIME TO FILL: ", time_to_fill)
                     print(interview_clip)
@@ -254,6 +257,7 @@ def update_order(json_data, starting_point, amount):
     This function is designed to update the order of all the clips in a given timeline, from a specified position
     """
     print("__________________________________________")
+    logging.debug("Updating order of all necessary clips")
     print("OLD")
     print(json_data)
     for item in json_data:

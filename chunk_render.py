@@ -164,6 +164,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 json_data['InterviewFootage'][clip]['Meta']['fullContextEnd'] = full_context_end
                 full_context_start = full_context_end
             
+            logging.debug("Full context start and end for all clips calculated")
             print(json_data)
             
             cp = copy.deepcopy(json_data['CutAwayFootage'])
@@ -179,25 +180,26 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                         print("BLANK END ", blank_end)
 
                         interview_clip = sherpaUtils.blank_json_replace(blank_start, blank_end, json_data, json_data['CutAwayFootage'][clip])
+                        print(interview_clip)
+                        if interview_clip is not None:
+                            logging.debug("Blank instance has interview clips playing below it")
+                            if isinstance(interview_clip, list):
+                                # Update all the orders from the blank onwards
+                                #amnt = (len(interview_clip) - 1)
+                                #json_data['CutAwayFootage'] = sherpaUtils.update_order(json_data['CutAwayFootage'], json_data['CutAwayFootage'][clip]['Meta']['order'], amnt)
+                                print(interview_clip[0])
+                                json_data['CutAwayFootage'][clip] = interview_clip[0]
+                                interview_clip.pop(0)
+                                pos = 0
+                                count = 9999
+                                for _item in interview_clip:
+                                    clip_name = str(count)
+                                    json_data['CutAwayFootage'][clip_name] = interview_clip[pos]
+                                    pos+=1
+                                    count+=1
+                            else:
+                                json_data['CutAwayFootage'][clip] = interview_clip
 
-                        if isinstance(interview_clip, list):
-                            # Update all the orders from the blank onwards
-                            #amnt = (len(interview_clip) - 1)
-                            #json_data['CutAwayFootage'] = sherpaUtils.update_order(json_data['CutAwayFootage'], json_data['CutAwayFootage'][clip]['Meta']['order'], amnt)
-                            print(interview_clip[0])
-                            json_data['CutAwayFootage'][clip] = interview_clip[0]
-                            interview_clip.pop(0)
-                            pos = 0
-                            count = 9999
-                            for _item in interview_clip:
-                                clip_name = str(count)
-                                json_data['CutAwayFootage'][clip_name] = interview_clip[pos]
-                                pos+=1
-                                count+=1
-                        else:
-                            json_data['CutAwayFootage'][clip] = interview_clip
-                
-        #print("Before")
         print(json_data)
         full_context_start = 0
         full_context_end = 0
@@ -210,9 +212,12 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             full_context_start = full_context_end
         #print("After")
         print(json_data)
+        logging.debug("JSON data is now: ")
+        logging.debug(json_data)
         video_list = []
         top_audio = []
         cutaway_timeline = 0
+        logging.debug("Clips ready in: {}".format(time.time() - start_time_count))
         print("Clips ready in: ", time.time() - start_time_count)
         for clip_name in json_data['CutAwayFootage']:
             logging.debug(clip_name + ":")
