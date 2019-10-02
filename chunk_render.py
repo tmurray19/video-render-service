@@ -277,7 +277,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             if os.path.exists(os.path.join(attach_dir, user, 'Template.json')):
                 logging.debug("Creating intro, this may take some time")
                 try:
-                    intro, transparent = getAndProcessTemplate.getandprocesstemplate(proj_id)
+                    intro, transparent = getAndProcessTemplate.getandprocesstemplate(user)
                     if transparent:
                         logging.debug("Transparent intro")
                         logging.debug("Creating composite of intro and first clip in render")
