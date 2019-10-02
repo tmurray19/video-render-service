@@ -3,7 +3,7 @@ from config import Config
 from datetime import datetime
 from math import ceil
 import generateEffects, sherpaUtils, os, time, logging, gc, copy
-
+import getAndProcessTemplate
 
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 proj = Config.PROJECT_NAME
