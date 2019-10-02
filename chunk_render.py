@@ -512,7 +512,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                     vid_dir,
                     threads=8,
                     audio_codec="aac",
-                    bitrate="8000k",
+                    bitrate="6000k",
                     remove_temp=True,
                     fps=global_frames
                 )        
