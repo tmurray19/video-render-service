@@ -246,7 +246,7 @@ def interview_audio_builder(interview_data, user):
     return sound_builder
 
 
-def better_generate_text_caption(clip, edit_data, compressed=False):
+def better_generate_text_caption(clip, edit_data, compressed=False, render_type=False):
     """
     clip: moviepy clip --> The clip you wish to add the text too
     caption_data: dict --> The JSON/Dictionry data of the caption you want to add
@@ -266,7 +266,10 @@ def better_generate_text_caption(clip, edit_data, compressed=False):
         
         caption_text = caption_data.get('text')
 
-        rez = (752, 380) if compressed else (1820, 980)
+        if render_type:            
+            rez = (379, 379) if compressed else (980, 980)
+        else:
+            rez = (752, 380) if compressed else (1820, 980)
 
         dur = max(1, clip.duration - 2)
         logging.debug("Duration of text clip is {}".format(dur))
@@ -429,8 +432,13 @@ def get_fps(proj_id):
             clip = myp.VideoFileClip(os.path.join(attach_dir, proj_id, clip_name))
 
             logging.debug("Clip FPS: {}".format(clip.fps))
-            proj_fps = clip.fps
+            print(type(clip.fps))
+            proj_fps = str(clip.fps)
+
             logging.debug("proj_fps set to {}".format(proj_fps))
+
+            proj_fps = float(proj_fps)
+            clip = None
             return proj_fps
     
     return 24

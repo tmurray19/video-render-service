@@ -56,6 +56,9 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
         logging.debug("Global fps has been set to {}".format(global_frames))
 
 
+        vid_type = json_data['VideoType']
+        one_to_one = True if vid_type == "Square" else False
+ 
 
         # Get timeline lengths
         cutaway_timeline_length = round(sherpaUtils.calculate_timeline_length(json_data['CutAwayFootage']), 2)
@@ -234,7 +237,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
                 # Generate caption data
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.append(clip.audio)
 
@@ -243,7 +246,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 logging.debug(clip_name + " is an image.")
                 clip = generateEffects.generate_image_clip(clip_data['Meta'], user)            
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.append(clip.audio)
 
@@ -252,7 +255,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 logging.debug(clip_name + " is a Blank.")
                 clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render)
+                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.append(clip.audio)
 
@@ -353,9 +356,8 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
 
         try:
             if not chunk_render:
-                vid_type = json_data['VideoType']
-                insta_rez = (round(1350*0.44357), round(1080*0.44357)) if compress_render else (1350, 1080)
-                if vid_type == "Square":
+                if vid_type == "Square":                
+                    insta_rez = (round(1080*0.44357), round(1080*0.44357)) if compress_render else (1080, 1080)
                     logging.debug("Resizing video to {}".format(insta_rez))
                     finished_video = finished_video.resize(insta_rez)
         except:
