@@ -287,7 +287,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                         # First clip has been removed from project            
                         first_clip = video_list.pop(0)
                         # Create composite, and insert back into project
-                        intro = CompositeVideoClip([intro, first_clip])
+                        intro = CompositeVideoClip([first_clip, intro])
                         logging.debug("Replacing first clip in project with intro")
                         video_list.insert(0, intro)
                         # No sound adding necessary, transparent intros take sound from first clip
