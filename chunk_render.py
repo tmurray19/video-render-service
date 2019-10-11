@@ -1,4 +1,4 @@
-from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip
+from moviepy.editor import CompositeVideoClip, concatenate_videoclips, concatenate_audioclips, CompositeAudioClip, AudioFileClip
 from config import Config
 from datetime import datetime
 from math import ceil
