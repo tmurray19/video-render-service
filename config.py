@@ -12,6 +12,9 @@ class Config(object):
     RESOURCE_PATH = os.environ.get('RESOURCE_PATH') or 'resource'
     WATCHER_LOGS = os.environ.get('WATCHER_LOG') or 'renderWatcher'
     RENDER_LOGS = os.environ.get('RENDER_LOG') or 'renderService'
+    FULL_LOGS = os.environ.get('RENDER_LOG') or 'renderServiceFull'
+    CHUNK_LOGS = os.environ.get('RENDER_LOG') or 'renderServiceChunk'
+    PREVIEW_LOGS = os.environ.get('RENDER_LOG') or 'renderServicePreview'
     FLASK_LOGS = os.environ.get('FLASK_LOG') or 'renderFlask'
     # Defining storage name and key
     STORAGE_ACCOUNT_NAME = os.environ.get('STORAGE_ACCOUNT_NAME') or 'csae48d5df47deax41bcxbaa'
