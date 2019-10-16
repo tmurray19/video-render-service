@@ -2,6 +2,7 @@
 
 import time
 from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 import driveClip
 from config import Config
@@ -18,7 +19,7 @@ class Watcher:
     DIRECTORY_TO_WATCH = os.path.join(Config.BASE_DIR, Config.QUEUE_LOCATION)
 
     def __init__(self):
-        self.observer = Observer()
+        self.observer = PollingObserver()
 
     def run(self):
         event_handler = Handler()

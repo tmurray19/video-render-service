@@ -4,9 +4,9 @@ import os
 
 # Config file
 class Config(object):
-    BASE_DIR = os.environ.get('BASE_DIR') or "/mnt/csae48d5df47deax41bcxbaa"
+    BASE_DIR = os.environ.get('BASE_DIR') or "/mnt/csae48d5df47deax41bcxbaa/SherpaVideos/"
     #BASE_DIR = os.environ.get('BASE_DIR') or "N:/project"
-    VIDS_LOCATION = os.environ.get('VIDS_LOCATION') or "videos"
+    VIDS_LOCATION = os.environ.get('VIDS_LOCATION') or "Videos"
     QUEUE_LOCATION = os.environ.get('QUEUE_LOCATION') or 'renderQueue'
     LOGS_LOCATION = os.environ.get('LOGS_LOCATION') or "logs" 
     RESOURCE_PATH = os.environ.get('RESOURCE_PATH') or 'resource'
