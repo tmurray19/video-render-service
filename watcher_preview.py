@@ -49,7 +49,7 @@ class Handler(FileSystemEventHandler):
 
         # Windows is created
         # Linux is modified
-        elif event.event_type == 'modified':
+        elif event.event_type == 'modified' or event.event_type == 'created':
             logging.debug('-------------------------------------------------------------------')
             time.sleep(1)
             recv_end, send_end = Pipe(False)
@@ -108,8 +108,9 @@ class Handler(FileSystemEventHandler):
                     print("File already rendered")
                     return
             else:
-                logging.debug("[watcher_preview.py] different render type")
 
+                logging.debug("[watcher_preview.py] different render type")
+                print("[watcher_preview.py] different render type")
 
 if __name__ == '__main__':
 
