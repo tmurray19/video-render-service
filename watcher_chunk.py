@@ -2,6 +2,7 @@
 
 import time
 from watchdog.observers import Observer
+from watchdog.observers.polling import PollingObserver
 from watchdog.events import FileSystemEventHandler
 import driveClip
 from config import Config
@@ -18,12 +19,14 @@ class Watcher:
     DIRECTORY_TO_WATCH = os.path.join(Config.BASE_DIR, Config.QUEUE_LOCATION)
 
     def __init__(self):
-        self.observer = Observer()
+        self.observer = PollingObserver()
 
     def run(self):
         event_handler = Handler()
         self.observer.schedule(event_handler, self.DIRECTORY_TO_WATCH, recursive=True)
         self.observer.start()
+        print(self.DIRECTORY_TO_WATCH)
+        logging.debug(self.DIRECTORY_TO_WATCH)
         try:
             while True:
                 time.sleep(5)
@@ -49,7 +52,7 @@ class Handler(FileSystemEventHandler):
 
         # Windows is created
         # Linux is modified
-        elif event.event_type == 'modified':
+        elif event.event_type == 'modified' or event.event_type == 'created':
             logging.debug('-------------------------------------------------------------------')
             time.sleep(1)
             recv_end, send_end = Pipe(False)
@@ -108,6 +111,7 @@ class Handler(FileSystemEventHandler):
                     print("File already rendered")
                     return
             else:
+                print("[watcher_chunk.py] different render type")
                 logging.debug("[watcher_chunk.py] different render type")
 
 
