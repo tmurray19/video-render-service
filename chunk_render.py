@@ -329,6 +329,9 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             voice_data = json_data['VoiceTrackURL']
             voice_audio_lvl = float(json_data['VoiceoverAudioLevel'])
             voice = generateEffects.open_voice(voice_data, voice_audio_lvl, user)
+            if voice.duration > cutaway_timeline:
+                voice = voice.set_end(cutaway_timeline)
+            voice = voice.audio_fadeout(2)
             top_audio = CompositeAudioClip([voice, top_audio])
             logging.debug("Music added successfully")
         except Exception as e:
