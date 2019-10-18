@@ -316,7 +316,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             # If the video is longer than the music, replay it
             if music.duration > cutaway_timeline:
                 music = CompositeAudioClip([music, generateEffects.open_music(music_data, music_audio_lvl, cutaway_timeline - music.duration)])
-            top_audio = CompositeAudioClip([top_audio, music])
+            top_audio = CompositeAudioClip([music, top_audio])
             logging.debug("Music added successfully")
         except Exception as e:
             logging.debug("Exception occured in render - during music audio building:")
@@ -329,7 +329,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             voice_data = json_data['VoiceTrackURL']
             voice_audio_lvl = float(json_data['VoiceoverAudioLevel'])
             voice = generateEffects.open_voice(voice_data, voice_audio_lvl, user)
-            top_audio = CompositeAudioClip([top_audio, voice])
+            top_audio = CompositeAudioClip([voice, top_audio])
             logging.debug("Music added successfully")
         except Exception as e:
             logging.debug("Exception occured in render - during voiceover audio building:")
