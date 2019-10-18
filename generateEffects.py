@@ -1,5 +1,6 @@
 import moviepy.editor as myp
 from moviepy.audio.fx.volumex import volumex
+from moviepy.video.fx.all import crop
 import sherpaUtils
 import os
 from config import Config
@@ -93,7 +94,7 @@ proj_fps=0
 
 # Generate a blank image
 # Add text right now just for clarity sake
-def generate_blank(clip_data, start=None, end=None, compressed=False):
+def generate_blank(clip_data, start=None, end=None, compressed=False, render_type=False):
 
     if start is None:
         start = (clip_data.get('startTime'))
@@ -121,11 +122,16 @@ def generate_blank(clip_data, start=None, end=None, compressed=False):
     blank_clip = blank_clip.set_audio(audio.set_duration(dur))
     logging.debug("FPS is: {}".format(proj_fps))
     blank_clip.fps = proj_fps
-
+    
+    if render_type:
+        crop_rez = ( (round((1350+285)*0.44357)), (round((1080)*0.44357)) ) if compressed else (1350+285, 1080)
+        x_1 = round(285 * 0.44357) if compressed else 285
+        blank_clip = crop(blank_clip, x1=x_1, y1=0, x2=crop_rez[0], y2=crop_rez[1])
+    
     return blank_clip
 
 
-def generate_clip(clip_data, user, start=None, end=None, compressed=False):
+def generate_clip(clip_data, user, start=None, end=None, compressed=False, render_type=False):
     """Generates clip data directly, without calling sherpaUtils within function"""
     related_file_name = clip_data.get('name')+"_com.mp4" if compressed else clip_data.get('name')+".mp4"
 
@@ -157,6 +163,12 @@ def generate_clip(clip_data, user, start=None, end=None, compressed=False):
         logging.error("No clip audio found for clip {}".format(clip_data.get('name')))
         audio = myp.AudioFileClip(os.path.join(resource_path, music_list[0]))
         clip = clip.set_audio(audio.set_duration(end - start))
+    
+    if render_type:
+        crop_rez = ( (round((1350+285)*0.44357)), (round((1080)*0.44357)) ) if compressed else (1350+285, 1080)
+        x_1 = round(285 * 0.44357) if compressed else 285
+        clip = crop(clip, x1=x_1, y1=0, x2=crop_rez[0], y2=crop_rez[1])
+    
 
     logging.debug("FPS is: {}".format(proj_fps))
     clip.fps = proj_fps
@@ -266,8 +278,9 @@ def better_generate_text_caption(clip, edit_data, compressed=False, render_type=
         
         caption_text = caption_data.get('text')
 
-        if render_type:            
-            rez = (379, 379) if compressed else (980, 980)
+        # If video is square, crop the clip
+        if render_type:
+            rez = ( (round((1350)*0.44357) - 100), (round((1080)*0.44357) - 100) ) if compressed else ((1350) - 100, 1080 - 100)
         else:
             rez = (752, 380) if compressed else (1820, 980)
 
@@ -299,7 +312,7 @@ def better_generate_text_caption(clip, edit_data, compressed=False, render_type=
         print(text_caption.size)
         text_caption = myp.CompositeVideoClip([text_caption.set_position(screen_pos)], size=rez)
         print("After")
-        print(text_caption.size)
+        print(text_caption.size)        
         #text_caption = text_caption.set_position(screen_pos)
 
         logging.debug("FPS is: {}".format(proj_fps))
@@ -440,5 +453,5 @@ def get_fps(proj_id):
             proj_fps = float(proj_fps)
             clip = None
             return proj_fps
-    
+
     return 24

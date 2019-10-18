@@ -234,7 +234,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             # If its a cutaway, just generate the clip and add a caption if it exists
             if clip_type == "CutAway" or clip_type == "Interview":
                 logging.debug(clip_name + " is a cutaway.")
-                clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render)
+                clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render, render_type=one_to_one)
                 # Generate caption data
                 logging.debug("Generating audio for {}".format(clip_name))
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
@@ -253,7 +253,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             # If it's a blank
             elif clip_type == "Blank" or clip_type == "CustomBlank":
                 logging.debug(clip_name + " is a Blank.")
-                clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render)
+                clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render, render_type=one_to_one)
                 logging.debug("Generating audio for {}".format(clip_name))
                 clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
@@ -356,10 +356,11 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
 
         try:
             if not chunk_render:
-                if vid_type == "Square":                
-                    insta_rez = (round(1080*0.44357), round(1080*0.44357)) if compress_render else (1080, 1080)
-                    logging.debug("Resizing video to {}".format(insta_rez))
-                    finished_video = finished_video.resize(insta_rez)
+                if one_to_one:
+                    logging.debug("Defunct. Square render handled elsewhere.")                
+                    #insta_rez = (round(1080*0.44357), round(1080*0.44357)) if compress_render else (1080, 1080)
+                    #logging.debug("Resizing video to {}".format(insta_rez))
+                    #finished_video = crop(finished_video, x1=0, y1=0, x2=insta_rez[0], y2=insta_rez[1])
         except:
             logging.error("Error occured in Square Video resize")
             logging.exception("")
