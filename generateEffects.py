@@ -451,7 +451,7 @@ def get_fps(proj_id):
             logging.debug("proj_fps set to {}".format(proj_fps))
 
             proj_fps = float(proj_fps)
-            clip = None
+            clip.close()
             return proj_fps
 
     return 24
