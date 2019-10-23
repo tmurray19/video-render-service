@@ -240,7 +240,8 @@ def blank_json_replace(blank_start, blank_end, json_data, blank_clip):
                                     "audioLevel": 1,
                                     "order": interview_clips[-1]["Meta"]['order']+1,
                                     "clipType": "CustomBlank"
-                                }
+                                },
+                                'edit': {}
                         }
 
 
