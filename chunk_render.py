@@ -238,7 +238,11 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 clip = generateEffects.generate_clip(clip_data=clip_data['Meta'], user=user, compressed=compress_render or chunk_render, render_type=one_to_one)
                 # Generate caption data
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
+                try:
+                    clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
+                except:
+                    logging.error("Execption occured in blank caption generation")
+                    logging.exception('')
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.append(clip.audio)
 
@@ -247,7 +251,11 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 logging.debug(clip_name + " is an image.")
                 clip = generateEffects.generate_image_clip(clip_data['Meta'], user)            
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
+                try:
+                    clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
+                except:
+                    logging.error("Execption occured in blank caption generation")
+                    logging.exception('')
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.append(clip.audio)
 
@@ -256,7 +264,11 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 logging.debug(clip_name + " is a Blank.")
                 clip = generateEffects.generate_blank(clip_data['Meta'], compressed=compress_render or chunk_render, render_type=one_to_one)
                 logging.debug("Generating audio for {}".format(clip_name))
-                clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
+                try:
+                    clip = generateEffects.better_generate_text_caption(clip, clip_data['edit'], compressed=compress_render or chunk_render, render_type=one_to_one)
+                except:
+                    logging.error("Execption occured in blank caption generation")
+                    logging.exception('')
                 logging.debug("Inserting audio for clip '{}'     Clip Audio is {}   Audio length is {}".format(clip_name, clip.audio, clip.duration))
                 top_audio.append(clip.audio)
 
