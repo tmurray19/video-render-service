@@ -7,6 +7,7 @@ import getAndProcessTemplate
 
 attach_dir = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION)
 proj = Config.PROJECT_NAME
+resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH)
 
 def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, chunk_number=0, all_clips=True):
     try:
