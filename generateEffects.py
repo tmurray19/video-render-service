@@ -21,6 +21,20 @@ positions = {
 }
 
 
+fonts = {
+    'Arial': 'Arial',
+    'Bookman': 'Bookman',
+    'Comic-Sans': 'Comic-Sans-MS',
+    'Courier': 'Courier',
+    'Forte': 'Forte',
+    'Garamond': 'Garamond-Bold',
+    'Georgia': 'Georgia',
+    'Palatino': 'Palatino-Linotype',
+    'Rage-Italic': 'Rage-Italic',
+    'Times-New-Roman': 'Times-New-Roman',
+    'Trebuchet-MS': 'Trebuchet-MS',
+}
+
 positions_small = {
     1: (0.08, 0.1),  # Top Left
     2: (0.75, 0.1),  # Top Right
@@ -299,7 +313,7 @@ def better_generate_text_caption(clip, edit_data, compressed=False, render_type=
         text_caption = myp.TextClip(
             txt=caption_text,
             fontsize=font_size,
-            font=caption_data.get('font'),
+            font=fonts[caption_data.get('font')],
             color=caption_data.get('fontColour'),
             #method='caption',
             #align=cardinal,
