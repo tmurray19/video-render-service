@@ -10,13 +10,16 @@ proj = Config.PROJECT_NAME
 resource_path = os.path.join(Config.BASE_DIR, Config.VIDS_LOCATION, Config.RESOURCE_PATH)
 
 def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, chunk_number=0, all_clips=True):
-    try:        
+    try:     
+        logging.debug('Removing chunk files...')   
         # Removes chunk files if they exist
         if chunk_render:
             chunk_del_dir = os.path.join(attach_dir, user)
-            for _root, _dirs, files in os.walk(chunk_del_dir):
-                if files.startswith(user + "_com_chunk_edited"):
-                    os.remove(files)
+            for _,_, files in os.walk(chunk_del_dir):
+                for f in files:
+                    if f.startswith(user + "_com_chunk"):
+                        logging.debug('{} removed'.format(f))
+                        os.remove(os.path.join(chunk_del_dir, f))
 
         start_time_count = time.time()      
         log_name = datetime.now().strftime("%Y.%m.%d-%H-%M-%S") + "_chunk_service_instance_id_{}_TESTING.log".format(user)
