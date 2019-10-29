@@ -304,6 +304,11 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                 logging.debug("Creating intro, this may take some time")
                 try:
                     intro, transparent = getAndProcessTemplate.getandprocesstemplate(user)
+                    if compress_render:
+                        intro = intro.resize((852, 480))
+                    logging.debug(intro)
+                    print(intro)
+                    input()
                     if transparent:
                         logging.debug("Transparent intro")
                         logging.debug("Creating composite of intro and first clip in render")
