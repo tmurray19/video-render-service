@@ -34,7 +34,15 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
             if send_end is not None:
                 send_end.send(results)
             return results
-
+        except:
+            logging.error("Error occured during project open")
+            logging.exception('')
+           
+            results = "Render exited without error [Error occured during json reading]", 0        
+            
+            if send_end is not None:
+                send_end.send(results)
+            return results
         # If a file can be found, but no edit data exists in the file
         if not json_data['CutAwayFootage'] and not json_data['InterviewFootage']:
             logging.error("This project seems to have no edit data recorded. Exiting render session")
@@ -429,7 +437,7 @@ def get_chunk(user, send_end=None, compress_render=False, chunk_render=False, ch
                     preview_clip.fps = global_frames
                     if preview_clip.duration < chunk_len/2:
                         logging.debug("Clip is smaller than {}s, so appending it to last clip instead.".format(chunk_len/2))
-                        preview_clip = concatenate_videoclips([preview_clip, preview_chunks[-1]])
+                        preview_clip = concatenate_videoclips([preview_chunks[-1], preview_clip])
                         del preview_chunks[-1]
                     preview_chunks.append(preview_clip)
 
